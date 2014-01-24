@@ -8,7 +8,7 @@ var app = tty.createServer({
   },
   "io": { "log": true },
   "debug": true,
-  port: 8080
+  port: 80
 });
 
 app.get('/foo', function(req, res, next) {
