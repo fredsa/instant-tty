@@ -1,0 +1,30 @@
+{
+  "name": "fredtty",
+  "version": "0.0.0",
+  "description": "Prototype demonstrating https://github.com/chjj/tty.js/ on GCE",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fredsa/instant-tty"
+  },
+  "keywords": [
+    "Compute",
+    "Engine",
+    "tty",
+    "terminal",
+    "instant"
+  ],
+  "author": "Fred Sauer <fredsa@google.com>",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "bugs": {
+    "url": "https://github.com/fredsa/instant-tty/issues"
+  },
+  "homepage": "https://github.com/fredsa/instant-tty",
+  "dependencies": {
+    "tty.js": "~0.2.13",
+    "express": "~3.4.8"
+  }
+}
