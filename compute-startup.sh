@@ -28,4 +28,4 @@ then
   npm install
 fi
 
-node index.js
+./index.js
