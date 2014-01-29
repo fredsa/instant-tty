@@ -20,38 +20,38 @@ fi
 
 if [ $(which node >/dev/null; echo $?) != 0 ]
 then
-	if [ ! -d node-v0.10.24-linux-x64 ]
-	then
-	  curl --silent http://nodejs.org/dist/v0.10.24/node-v0.10.24-linux-x64.tar.gz | tar xz
-	fi
+  if [ ! -d node-v0.10.24-linux-x64 ]
+  then
+    curl --silent http://nodejs.org/dist/v0.10.24/node-v0.10.24-linux-x64.tar.gz | tar xz
+  fi
 
-	export PATH="$(pwd)/node-v0.10.24-linux-x64/bin:$PATH"
+  export PATH="$(pwd)/node-v0.10.24-linux-x64/bin:$PATH"
 fi
 
 if [ ! -d instant-tty ]
 then
   if [ $( gsutil -q stat $gsfile ;echo $? ) == 0 ]
   then
-  	echo "Using existing pre-built project archive $gsfile ..."
-	  gsutil cp $gsfile .
-  	unzip -q instant-tty.zip
+    echo "Using existing pre-built project archive $gsfile ..."
+    gsutil cp $gsfile .
+    unzip -q instant-tty.zip
   else
-  	echo "Building a new project archive, which we will attempt to copy to $gsfile ..."
-  	git clone https://github.com/fredsa/instant-tty
-  	(
-			cd instant-tty
-	  	npm install
-			sed -i -e "s/\(resource.*\)'socket.io'/\1'secret42'/" node_modules/tty.js/static/tty.js
-		)
-		zip --quiet -r instant-tty instant-tty/
-		gsutil cp instant-tty.zip $gsfile
-		gsutil ls -l $gsfile
+    echo "Building a new project archive, which we will attempt to copy to $gsfile ..."
+    git clone https://github.com/fredsa/instant-tty
+    (
+      cd instant-tty
+      npm install
+      sed -i -e "s/\(resource.*\)'socket.io'/\1'secret42'/" node_modules/tty.js/static/tty.js
+    )
+    zip --quiet -r instant-tty instant-tty/
+    gsutil cp instant-tty.zip $gsfile
+    gsutil ls -l $gsfile
   fi
 fi
 
 
 echo "Launching server..."
 (
-	cd instant-tty
+  cd instant-tty
   ./index.js --port 80
 )
