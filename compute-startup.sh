@@ -1,12 +1,13 @@
 #!/bin/bash
 #
+set -evu
 
 cd
 
 if [ $(which git >/dev/null; echo $?) == 1 ]
 then
   sudo apt-get update -y
-  sudo apt-get install -y git
+  sudo apt-get install -y git make g++
 fi
 
 if [ ! -d node-v0.10.24-linux-x64 ]
