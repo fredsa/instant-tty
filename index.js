@@ -8,15 +8,23 @@ var app = tty.createServer({
   users: {
     //foo: 'bar'
   },
-  "io": { "log": true },
+  "io": {
+  	"log": true,
+  	"resource": "/socket.io"
+  },
   "debug": true,
-  port: 80
+  "static": __dirname,
+  port: 8080
 });
 
 app.get('/foo', function(req, res, next) {
   res.send('bar');
 });
 
-app.use(express.static(__dirname));
+//app.use(express.static(__dirname));
+
+app.setAuth(function(req, res, next) {
+	next();
+});
 
 app.listen();
