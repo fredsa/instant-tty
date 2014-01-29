@@ -1,34 +1,57 @@
 #!/bin/bash
 #
-set -evu
+set -eu
 
-cd
+# See https://developers.google.com/compute/docs/instances?hl=en#dmi
+if [ "$( sudo dmidecode -s bios-vendor 2>/dev/null | grep Google )" != "Google" ]
+then
+  echo "ERROR: This script must be run on a Google Compute Engine instance."
+  exit 1
+fi
 
-if [ $(which git >/dev/null; echo $?) == 1 ]
+projectid="$( curl -s http://metadata/0.1/meta-data/project-id )"
+gsfile=gs://$projectid/instant-tty.zip
+
+if [ $(which git >/dev/null; echo $?) != 0 ]
 then
   sudo apt-get update -y
-  sudo apt-get install -y git make g++
+  sudo apt-get install -y git make g++ zip
 fi
 
-if [ ! -d node-v0.10.24-linux-x64 ]
+if [ $(which node >/dev/null; echo $?) != 0 ]
 then
-  wget http://nodejs.org/dist/v0.10.24/node-v0.10.24-linux-x64.tar.gz
-  tar xvfz node-v0.10.24-linux-x64.tar.gz
+	if [ ! -d node-v0.10.24-linux-x64 ]
+	then
+	  curl --silent http://nodejs.org/dist/v0.10.24/node-v0.10.24-linux-x64.tar.gz | tar xz
+	fi
+
+	export PATH="$(pwd)/node-v0.10.24-linux-x64/bin:$PATH"
 fi
-export PATH=$PATH:~/node-v0.10.24-linux-x64/bin
 
 if [ ! -d instant-tty ]
 then
-  git clone https://github.com/fredsa/instant-tty
+  if [ $( gsutil -q stat $gsfile ;echo $? ) == 0 ]
+  then
+  	echo "Using existing pre-built project archive $gsfile ..."
+	  gsutil cp $gsfile .
+  	unzip -q instant-tty.zip
+  else
+  	echo "Building a new project archive, which we will attempt to copy to $gsfile ..."
+  	git clone https://github.com/fredsa/instant-tty
+  	(
+			cd instant-tty
+	  	npm install
+			sed -i -e "s/\(resource.*\)'socket.io'/\1'secret42'/" node_modules/tty.js/static/tty.js
+		)
+		zip --quiet -r instant-tty instant-tty/
+		gsutil cp instant-tty.zip $gsfile
+		gsutil ls -l $gsfile
+  fi
 fi
 
-cd instant-tty
 
-if [ ! -d node_modules ]
-then
-  npm install
-fi
-
-sed -i -e "s/\(resource.*\)'socket.io'/\1'secret42'/" node_modules/tty.js/static/tty.js
-
-./index.js
+echo "Launching server..."
+(
+	cd instant-tty
+  ./index.js --port 80
+)
