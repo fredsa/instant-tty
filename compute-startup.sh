@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-set -eu
+set -euv
 
 time (
   # See https://developers.google.com/compute/docs/instances?hl=en#dmi
@@ -15,7 +15,7 @@ time (
 
   if [ $(which git >/dev/null; echo $?) != 0 ]
   then
-    sudo apt-get update -y
+    # sudo apt-get update -y
     sudo apt-get install -y git make g++ zip
   fi
 
@@ -34,7 +34,7 @@ time (
     if [ $( gsutil -q stat $gsfile ;echo $? ) == 0 ]
     then
       echo "Using existing pre-built project archive $gsfile ..."
-      gsutil cp $gsfile .
+      gsutil -q cp $gsfile .
       unzip -q instant-tty.zip
     else
       echo "Building a new project archive, which we will attempt to copy to $gsfile ..."
@@ -45,8 +45,8 @@ time (
         sed -i -e "s/\(resource.*\)'socket.io'/\1'secret42'/" node_modules/tty.js/static/tty.js
       )
       zip --quiet -r instant-tty instant-tty/
-      gsutil cp instant-tty.zip $gsfile
-      gsutil ls -l $gsfile
+      gsutil -q cp instant-tty.zip $gsfile
+      gsutil -q ls -la $gsfile
     fi
   fi
 
