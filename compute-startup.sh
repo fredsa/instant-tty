@@ -28,4 +28,6 @@ then
   npm install
 fi
 
+sed -i -e "s/\(resource.*\)'socket.io'/\1'secret42'/" node_modules/tty.js/static/tty.js
+
 ./index.js

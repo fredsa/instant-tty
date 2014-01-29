@@ -10,7 +10,7 @@ var app = tty.createServer({
   },
   "io": {
   	"log": true,
-  	"resource": "/socket.io"
+  	"resource": "/secret42"
   },
   "debug": true,
   "static": __dirname,
