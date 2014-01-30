@@ -15,7 +15,7 @@ time (
 
   if [ $(which git >/dev/null; echo $?) != 0 ]
   then
-    # sudo apt-get update -y
+    sudo apt-get update -y
     sudo apt-get install -y git make g++ zip
   fi
 
