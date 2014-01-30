@@ -55,26 +55,37 @@ echo ""
 echo -e "Hit [ENTER] to confirm: \c"
 read dummy
 
-gcutil getfirewall \
-  --project $projectid \
-  allow-inbound-http >/dev/null ||
-gcutil addfirewall \
-  --project=$projectid \
+# Ensure that we have a firewall rule in place
+gcutil getfirewall allow-inbound-http >/dev/null \
+  --project $projectid ||
+gcutil addfirewall allow-inbound-http \
   --allowed="tcp:80" \
   --description "Incoming HTTP allowed" \
-  allow-inbound-http
+  --project=$projectid
 
-gcutil addinstance \
-  --project $projectid \
-  --zone $ZONE \
+# Create instance
+gcutil addinstance $instancename \
   --machine_type $MACHINE_TYPE \
   --image $IMAGE \
   --metadata="startup-script-url:$STARTUP_SCRIPT_URL" \
   --service_account_scopes=$scopes \
-  $instancename ||
+  --zone $ZONE \
+  --project $projectid &&
+(
+  echo "To view progress run:"
+  echo " $ gcutil ssh \
+    --zone $ZONE \
+    --project $projectid \
+    $instancename \
+    tail -f /var/log/startupscript.log"
+  externalip="$(gcutil getinstance foo --zone us-central1-a --project little-black-box |grep external-ip | sed -e 's/ //g' | cut -d\| -f3)"
+  url="http://externalip/"
+  echo "To connect to the instance once it's running:"
+  echo "  $url"
+) ||
 (
   echo "EXISTING INSTANCES: "
   gcutil listinstances \
-  --project $projectid \
-  --zone $ZONE
+  --zone $ZONE \
+  --project $projectid
 )
