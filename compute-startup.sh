@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-set -euv
+set -eux
 
 time (
   # See https://developers.google.com/compute/docs/instances?hl=en#dmi
