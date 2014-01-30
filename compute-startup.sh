@@ -11,8 +11,7 @@ time (
   fi
 
   projectid="$( curl -s http://metadata/0.1/meta-data/project-id )"
-  gsfile=gs://$projectid/instant-tty.zip
-
+  gsfile=gs://$projectid/instant-tty.tar.gz
 
   if [ $(which node >/dev/null; echo $?) != 0 ]
   then
@@ -30,19 +29,19 @@ time (
     then
       echo "Using existing pre-built project archive $gsfile ..."
       gsutil -q cp $gsfile .
-      unzip -q instant-tty.zip
+      tar xfz instant-tty.tar.gz
     else
       echo "Building a new project archive, which we will attempt to copy to $gsfile ..."
       sudo apt-get update -y
-      sudo apt-get install -y git make g++ zip
+      sudo apt-get install -y git make g++
       git clone https://github.com/fredsa/instant-tty
       (
         cd instant-tty
         npm install
         sed -i -e "s/\(resource.*\)'socket.io'/\1'secret42'/" node_modules/tty.js/static/tty.js
       )
-      zip --quiet -r instant-tty instant-tty/
-      gsutil -q cp instant-tty.zip $gsfile
+      tar cfz instant-tty.tar.gz instant-tty/
+      gsutil -q cp instant-tty.tar.gz $gsfile
       gsutil -q ls -la $gsfile
     fi
   fi

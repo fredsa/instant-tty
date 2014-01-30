@@ -17,7 +17,7 @@ then
   exit 1
 fi
 
-gsfile="gs://$projectid/instant-tty.zip"
+gsfile="gs://$projectid/instant-tty.tar.gz"
 if [ $( gsutil -q stat $gsfile; echo $? ) == 0 ]
 then
   scopes=storage-ro
@@ -81,6 +81,7 @@ echo ""
 echo "TO VIEW BOOT PROGRESS:"
 echo ""
 echo " $ gcutil ssh --zone $ZONE --project $projectid $instancename tail -f /var/log/startupscript.log"
+echo ""
 
 externalip="$(
   gcutil getinstance $instancename \
@@ -91,6 +92,7 @@ externalip="$(
     | cut -d'|' -f3
 )"
 url="http://$externalip/"
+echo ""
 echo "TO CONNECT TO THE INSTANCE ONCE IT'S RUNNING:"
 echo ""
 echo "  $url"
