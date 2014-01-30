@@ -13,11 +13,6 @@ time (
   projectid="$( curl -s http://metadata/0.1/meta-data/project-id )"
   gsfile=gs://$projectid/instant-tty.zip
 
-  if [ $(which git >/dev/null; echo $?) != 0 ]
-  then
-    sudo apt-get update -y
-    sudo apt-get install -y git make g++ zip
-  fi
 
   if [ $(which node >/dev/null; echo $?) != 0 ]
   then
@@ -38,6 +33,8 @@ time (
       unzip -q instant-tty.zip
     else
       echo "Building a new project archive, which we will attempt to copy to $gsfile ..."
+      sudo apt-get update -y
+      sudo apt-get install -y git make g++ zip
       git clone https://github.com/fredsa/instant-tty
       (
         cd instant-tty

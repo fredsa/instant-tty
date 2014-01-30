@@ -82,9 +82,16 @@ echo "TO VIEW BOOT PROGRESS:"
 echo ""
 echo " $ gcutil ssh --zone $ZONE --project $projectid $instancename tail -f /var/log/startupscript.log"
 
-externalip="$(gcutil getinstance foo --zone us-central1-a --project little-black-box | grep external-ip | sed -e 's/ //g' | cut -d\| -f3)"
+externalip="$(
+  gcutil getinstance $instancename \
+    --zone $ZONE \
+    --project $projectid \
+    | grep 'external-ip' \
+    | sed -e 's/ //g' \
+    | cut -d'|' -f3
+)"
 url="http://$externalip/"
 echo "TO CONNECT TO THE INSTANCE ONCE IT'S RUNNING:"
 echo ""
 echo "  $url"
-ecoh ""
+echo ""
