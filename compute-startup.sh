@@ -41,8 +41,7 @@ time (
         sed -i -e "s/\(resource.*\)'socket.io'/\1'secret42'/" node_modules/tty.js/static/tty.js
       )
       tar cfz instant-tty.tar.gz instant-tty/
-      gsutil -q cp instant-tty.tar.gz $gsfile
-      gsutil -q ls -la $gsfile
+      gsutil -q cp instant-tty.tar.gz $gsfile && gsutil -q ls -la $gsfile || echo "WARNING: Unable to write to $gsfile"
     fi
   fi
 
