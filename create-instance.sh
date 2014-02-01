@@ -2,10 +2,15 @@
 #
 set -eu
 
+SCRIPT_DIR=$( dirname $0 )
+ROOT_DIR=$( dirname $SCRIPT_DIR )
+
 if [ $# == 2 ]
 then
   projectid="$1"
   shift
+else
+  projectid=$( cat $ROOT_DIR/app.yaml | egrep '^application:' | sed 's/application: *\([0-9a-z][-0-9a-z]*[0-9a-z]\).*/\1/' )
 fi
 
 if [ $# == 0 ]
@@ -30,6 +35,8 @@ shift
 
 ZONE=us-central1-a
 MACHINE_TYPE=f1-micro
+
+echo "LISTING DEBIAN IMAGES:"
 IMAGE=$(
   # select the most recent debian-* image
   gcutil listimages \

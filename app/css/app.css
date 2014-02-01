@@ -1,0 +1,15 @@
+BODY {
+  margin: 1em;
+}
+
+.alert {
+  display: block;
+}
+
+.alert-pre {
+  white-space: pre-wrap;
+}
+
+.alert-reduced-margin {
+  margin-bottom: 2px;
+}

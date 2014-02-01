@@ -1,0 +1,25 @@
+application: little-black-box
+version: gitcommithash
+api_version: 1
+runtime: python27
+threadsafe: true
+
+handlers:
+- url: /api/.*
+  script: gae.main.APPLICATION
+
+- url: /task/.*
+  script: gae.task.APPLICATION
+  login: admin
+
+- url: /bootstrap
+  static_dir: bootstrap
+
+- url: /
+  static_files: app/index.html
+  upload: app/
+
+# Must be last
+- url: /
+  static_dir: app
+
