@@ -41,7 +41,7 @@ then
     echo "DELETING INSTANCE $instance:"
     gcutil deleteinstance \
       --project=$projectid \
-      $instance --delete_boot_pd --force
+      $instance --delete_boot_pd --force &
   done
 fi
 
@@ -72,7 +72,12 @@ then
     echo "DELETING INSTANCE $disk:"
     gcutil deletedisk \
       --project=$projectid \
-      $disk --force
+      $disk --force &
   done
 fi
 
+echo ""
+echo "LISTING OPERATIONS:"
+gcutil listoperations \
+  --project=$projectid \
+  --filter="status ne DONE"
