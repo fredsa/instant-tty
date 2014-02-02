@@ -17,6 +17,10 @@ angular.module('myApp', [
     controller: 'MainController',
     resolve: {'config': 'appConfig'},
   });
+  $routeProvider.when('/oauth2callback', {
+    templateUrl: 'partials/oauth2callback.html',
+    controller: 'OAuth2Controller',
+  });
   $routeProvider.otherwise({redirectTo: '/'});
   $httpProvider.interceptors.push('appHttpInterceptor');
 }]);

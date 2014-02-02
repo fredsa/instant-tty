@@ -2,6 +2,7 @@ import cgi
 import json
 import webapp2
 
+from . import compute
 from . import error
 from . import middleware
 from . import model
@@ -15,6 +16,15 @@ _JSON_ENCODER.indent = 4
 _JSON_ENCODER.sort_keys = True
 
 _JSON_DECODER = json.JSONDecoder()
+
+# From https://cloud.google.com/console/project/apps~little-black-box/apiui/credential
+CLIENT_ID = '638064416490.apps.googleusercontent.com'
+
+# TODO: create redirect URI dynamically
+if shared.IsDevMode():
+  redirect_uri = 'http://localhost:8080/'
+else:
+  redirect_uri = 'https://{}/'.format(app_identity.get_default_version_hostname())
 
 
 def tojson(r):
@@ -51,6 +61,23 @@ class AppHandler(webapp2.RequestHandler):
       self.response.write(body)
     else:
       self.response.write('{}'.format(cgi.escape(body, quote=True)))
+
+  def MakeOauth2Url(self):
+    callbackuri = ('{}://{}/oauth2callback'
+                   .format(self.request.scheme, self.request.host))
+    scopes = '{}+{}'.format(settings.COMPUTE_SCOPE,
+                            settings.STORAGE_SCOPE_READ_ONLY)
+    # See https://developers.google.com/accounts/docs/OAuth2UserAgent
+    return ('https://accounts.google.com/o/oauth2/auth'
+            '?response_type=token'
+            '&client_id={}'
+            '&redirect_uri={}'
+            '&scope={}'
+            # '&state=foo'
+            '&approval_prompt=force'
+            # '&login_hint={}'
+            '&include_granted_scopes=false'
+            .format(CLIENT_ID, callbackuri, scopes))
 
   def PerformAccessCheck(self):
     """Perform authorization checks.
@@ -94,9 +121,23 @@ class ConfigHandler(AppHandler):
     pass
 
   def jsonget(self):
-    return {
-      'your': 'config'
+    map = {
+      'your': 'config',
     }
+    if not compute.GetAccessToken():
+      map['oauth2_url'] = self.MakeOauth2Url()
+    return map
+
+
+class Oauth2Handler(AppHandler):
+
+  def PerformAccessCheck(self):
+    assert shared.IsDevMode()
+
+  def jsonpost(self):
+    compute.SetAccessToken(access_token=self.request.data['access_token'],
+                           token_type=self.request.data['token_type'],
+                           expires_in=self.request.data['expires_in'])
 
 
 class InstanceHandler(AppHandler):
@@ -117,6 +158,7 @@ class InstanceHandler(AppHandler):
 
 APPLICATION = webapp2.WSGIApplication([
     ('/api/config', ConfigHandler),
+    ('/api/oauth2', Oauth2Handler),
     ('/api/instance', InstanceHandler),
 ], debug=settings.DEBUG)
 APPLICATION = middleware.Session(APPLICATION, wsgi_config.WSGI_CONFIG)

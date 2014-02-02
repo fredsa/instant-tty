@@ -5,6 +5,7 @@ import os
 import shared
 
 from google.appengine.api import app_identity
+from google.appengine.api import memcache
 from google.appengine.api import urlfetch
 
 from . import settings
@@ -39,20 +40,25 @@ COMPUTE_DISKS_URL = '{}/disks'.format(COMPUTE_PROJECT_ZONE_URL)
 
 DEFAULT_NETWORK_URL = '{}/networks/default'.format(COMPUTE_PROJECT_GLOBAL_URL)
 
+COMPUTE_AUTHORIZATION_MEMCACHE_KEY = 'COMPUTE_AUTHORIZATION_MEMCACHE_KEY'
+
+STARTUP_SCRIPT_URL='https://raw.github.com/fredsa/instant-tty/master/compute-startup.sh'
+
 
 def _Fetch(reason, url, method='GET', payload=None):
   if shared.IsDevMode():
-    import devmode
-    authorization_token = devmode.authorization_token
+    authorization_value = GetAccessToken()
   else:
-    authorization_token, _ = app_identity.get_access_token(settings.COMPUTE_SCOPE)
+    Authorization_token, _ = app_identity.get_access_token(settings.COMPUTE_SCOPE)
+    authorization_value = 'OAuth {}'.format(Authorization_token)
+  assert authorization_value
   response = urlfetch.fetch(url=url,
                             method=method,
                             payload=payload,
                             follow_redirects=False,
                             headers = {
                               'Content-Type': settings.JSON_MIME_TYPE,
-                              'Authorization': 'OAuth ' + authorization_token
+                              'Authorization': authorization_value,
                             })
   shared.i('COMPUTE: {} -> {}'.format(reason, httplib.responses[response.status_code]))
 
@@ -60,6 +66,18 @@ def _Fetch(reason, url, method='GET', payload=None):
     Abort(response.status_code, 'UrlFetch() {} {}\nWith Payload: {}\nResulted in:\n{}'
                                 .format(method, url, payload, response.content))
   return json.loads(response.content)
+
+def GetAccessToken():
+  access_token = memcache.get(COMPUTE_AUTHORIZATION_MEMCACHE_KEY)
+  # shared.w('{} <- GetAccessToken()'.format(access_token))
+  return access_token
+
+
+def SetAccessToken(access_token, token_type, expires_in):
+  # shared.w('SetAccessToken({})'.format(access_token))
+  memcache.set(COMPUTE_AUTHORIZATION_MEMCACHE_KEY,
+               '{} {}'.format(token_type, access_token))
+
 
 def ListInstances():
   r = _Fetch('LIST INSTANCES',url=COMPUTE_INSTANCES_URL)
@@ -117,21 +135,42 @@ def GetInstance(instance_name):
 def _CreateInstance(instance_name):
   disk = GetOrCreateDisk(instance_name)
   diskurl = disk['selfLink']
+  payload = json.dumps({
+   'machineType': COMPUTE_MACHINE_TYPE_URL,
+   'name': instance_name,
+   'networkInterfaces': [{
+     'accessConfigs': [{
+       'type': 'ONE_TO_ONE_NAT',
+       'name': 'External NAT'
+     }],
+     'network': DEFAULT_NETWORK_URL,
+   }],
+   'disks': [{
+     'boot': True,
+     'type': 'PERSISTENT',
+     'source': diskurl,
+   }],
+   'metadata': {
+     'items': [
+       {
+         'key': 'startup-script-url',
+         'value': STARTUP_SCRIPT_URL,
+       }
+     ]
+   },
+   'serviceAccounts': [
+     {
+       'email': 'default',
+       'scopes': [
+         settings.STORAGE_SCOPE_READ_ONLY
+       ]
+     }
+   ],
+  })
   r = _Fetch('instances.insert({!r})'.format(instance_name),
              url=COMPUTE_INSTANCES_URL,
              method='POST',
-             payload=json.dumps({
-               'machineType': COMPUTE_MACHINE_TYPE_URL,
-               'name': instance_name,
-               'networkInterfaces': [{
-                 'network': DEFAULT_NETWORK_URL,
-               }],
-               'disks': [{
-                 'boot': True,
-                 'type': 'PERSISTENT',
-                 'source': diskurl,
-               }],
-             }))
+             payload=payload)
   return r
 
 def GetOrCreateInstance(instance_name):

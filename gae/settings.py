@@ -16,6 +16,8 @@ COMPUTE_ZONE = 'us-central1-a'
 
 COMPUTE_SCOPE = 'https://www.googleapis.com/auth/compute'
 
+STORAGE_SCOPE_READ_ONLY = 'https://www.googleapis.com/auth/devstorage.read_only'
+
 COMPUTE_MACHINE_TYPE = 'f1-micro'
 
 # whether or not we're running in the dev_appserver

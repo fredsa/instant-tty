@@ -15,7 +15,7 @@ handlers:
 - url: /bootstrap
   static_dir: bootstrap
 
-- url: /
+- url: (/|/oauth2callback)
   static_files: app/index.html
   upload: app/
 

@@ -11,6 +11,7 @@ class InstanceHandler(webapp2.RequestHandler):
   def post(self):
     instance_name = self.request.get('instance_name')
     assert instance_name
+    # TODO: Make sure we don't re-use an undeleted disk
     disk_name = compute.GetOrCreateDisk(instance_name)
     if not disk_name:
       self.error(httplib.REQUEST_TIMEOUT)

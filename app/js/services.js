@@ -82,11 +82,6 @@ angular.module('myApp.services', [])
 
 .factory('appConfig', ['$http', '$q', '$timeout', function($http, $q, $timeout) {
   var deferred = $q.defer();
-  // $timeout(function() {
-  //   deferred.resolve('foo');
-  // }, 5000);
-  // return deferred.promise;
-
   $http.get('/api/config').then(function(response) {
     deferred.resolve(response.data);
   }, function() {
