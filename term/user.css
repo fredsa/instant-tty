@@ -1,4 +1,14 @@
-html.maximized {
+HTML, BODY {
+  margin: 0px;
+  padding: 0px;
+  height: 100%;
+}
+
+.main-content {
+  padding: 10px;
+}
+
+HTML.maximized {
   overflow: hidden;
 }
 
@@ -11,8 +21,8 @@ html.maximized {
   border: #fafafa solid 1px;
   background: #272829;
   position: absolute;
-  top: 50px;
-  left: 100px;
+  top: 20px;
+  left: 30px;
   z-index: 1000;
   font-family: monospace;
   box-shadow: rgba(0, 0, 0, 0.8) 2px 2px 20px;
@@ -77,4 +87,26 @@ html.maximized {
   font-size: 11px;
   color: #f0f0f0;
   background: #000;
+}
+
+.page {
+  min-height: 100%;
+  position: relative;
+}
+.main-content {
+  /* 9em + 2 * .5em = 10em */
+  padding-bottom: 10em;
+}
+.footer {
+  /* 9em + 2 * .5em = 10em */
+  height: 9em;
+  padding: .5em;
+}
+
+.footer {
+  width: 100%;
+  border-top: 1px solid #666;
+  color: #666;
+  position: absolute;
+  bottom: 0px;
 }
