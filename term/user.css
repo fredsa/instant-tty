@@ -12,6 +12,18 @@ HTML.maximized {
   overflow: hidden;
 }
 
+.connected .connecting {
+  display: none;
+}
+
+.hidden {
+  display: none;
+}
+
+.connected .connected {
+  display: inline-block;
+}
+
 /**
  * Terminal
  */
