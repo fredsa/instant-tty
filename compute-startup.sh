@@ -36,7 +36,7 @@ time (
       sudo apt-get install -y git make g++
       git clone https://github.com/fredsa/instant-tty
       (
-        cd instant-tty
+        cd instant-tty/term
         npm install
         sed -i -e "s/\(resource.*\)'socket.io'/\1'secret42'/" node_modules/tty.js/static/tty.js
       )
@@ -49,6 +49,6 @@ time (
   echo "Launching server..."
   (
     cd instant-tty
-    ./index.js --port 80
+    term/index.js --port 80
   )
 )
