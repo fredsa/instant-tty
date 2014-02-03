@@ -38,7 +38,6 @@ time (
       (
         cd instant-tty/term
         npm install
-        sed -i -e "s/\(resource.*\)'socket.io'/\1'secret42'/" node_modules/tty.js/static/tty.js
       )
       tar cfz instant-tty.tar.gz instant-tty/
       gsutil -q cp instant-tty.tar.gz $gsfile && gsutil -q ls -la $gsfile || echo "WARNING: Unable to write to $gsfile"
@@ -49,6 +48,6 @@ time (
   echo "Launching server..."
   (
     cd instant-tty
-    term/index.js --port 80
+    ./term.sh --port 80
   )
 )
