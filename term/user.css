@@ -66,12 +66,10 @@ HTML.maximized {
   position: absolute;
   right: 5px;
   top: 2px;
-  font-size: 11px;
   cursor: default;
 }
 
 .tab {
-  font-size: 16px;
   margin-left: 8px;
   margin-top: -2px;
   float: left;
@@ -96,7 +94,6 @@ HTML.maximized {
 .terminal {
   border: #000 solid 5px;
   font-family: monospace;
-  font-size: 11px;
   color: #f0f0f0;
   background: #000;
 }
