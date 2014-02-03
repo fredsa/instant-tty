@@ -5,6 +5,7 @@ var tty = require('tty.js');
 
 var app = tty.createServer({
   shell: 'bash',
+  shellArgs: ['-l'], // run bash as a login shell
   users: {
     //foo: 'bar'
   },
