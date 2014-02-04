@@ -55,7 +55,7 @@
   <div ng-view></div>
 
   <div ng-controller="ChannelController">
-    {{last_message}}
+    <div ng-repeat="msg in messages">{{msg}}</div>
   </div>
 
   <div ng-controller="AlertController">

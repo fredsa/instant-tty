@@ -26,6 +26,8 @@ angular.module('myApp.controllers', [])
 
   var retry_delay_ms = INITIAL_RETRY_DELAY_MS;
 
+  $scope.messages = [];
+
   $scope.onopen = function() {
     $log.debug('socket.onopen()');
     retry_delay_ms = INITIAL_RETRY_DELAY_MS;
@@ -49,7 +51,7 @@ angular.module('myApp.controllers', [])
 
   $scope.onmessage = function(msg) {
     $log.debug('socket.onmessage(', msg, ')');
-    $scope.last_message = msg.data;
+    $scope.messages.push(msg.data);
     $scope.$apply();
   }
 

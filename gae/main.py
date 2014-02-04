@@ -116,7 +116,6 @@ class ConfigHandler(AppHandler):
     pass
 
   def get(self):
-    shared.w('creating channel ' + self.user_id)
     map = {
       'user_id': self.user_id,
       'channel_token': channel.create_channel(self.user_id),
