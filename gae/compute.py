@@ -47,7 +47,7 @@ STARTUP_SCRIPT_URL='https://raw.github.com/fredsa/instant-tty/master/compute-sta
 
 def _Fetch(reason, url, method='GET', payload=None):
   if shared.IsDevMode():
-    authorization_value = GetAccessToken()
+    authorization_value = GetDevModeAccessToken()
   else:
     Authorization_token, _ = app_identity.get_access_token(settings.COMPUTE_SCOPE)
     authorization_value = 'OAuth {}'.format(Authorization_token)
@@ -67,14 +67,14 @@ def _Fetch(reason, url, method='GET', payload=None):
                                 .format(method, url, payload, response.content))
   return json.loads(response.content)
 
-def GetAccessToken():
+def GetDevModeAccessToken():
   access_token = memcache.get(COMPUTE_AUTHORIZATION_MEMCACHE_KEY)
-  # shared.w('{} <- GetAccessToken()'.format(access_token))
+  # shared.w('{} <- GetDevModeAccessToken()'.format(access_token))
   return access_token
 
 
-def SetAccessToken(access_token, token_type, expires_in):
-  # shared.w('SetAccessToken({})'.format(access_token))
+def SetDevModeAccessToken(access_token, token_type, expires_in):
+  # shared.w('SetDevModeAccessToken({})'.format(access_token))
   memcache.set(COMPUTE_AUTHORIZATION_MEMCACHE_KEY,
                '{} {}'.format(token_type, access_token))
 

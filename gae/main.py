@@ -127,7 +127,7 @@ class ConfigHandler(AppHandler):
     map = {
       'your': 'config',
     }
-    if not compute.GetAccessToken():
+    if shared.IsDevMode() and not compute.GetDevModeAccessToken():
       map['oauth2_url'] = self.MakeOauth2Url()
     return map
 
@@ -138,9 +138,9 @@ class Oauth2Handler(AppHandler):
     assert shared.IsDevMode()
 
   def jsonpost(self):
-    compute.SetAccessToken(access_token=self.request.data['access_token'],
-                           token_type=self.request.data['token_type'],
-                           expires_in=self.request.data['expires_in'])
+    compute.SetDevModeAccessToken(access_token=self.request.data['access_token'],
+                                  token_type=self.request.data['token_type'],
+                                  expires_in=self.request.data['expires_in'])
 
 
 class InstanceHandler(AppHandler):
