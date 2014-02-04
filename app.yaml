@@ -23,3 +23,13 @@ handlers:
 - url: /
   static_dir: app
 
+# See https://developers.google.com/appengine/docs/python/config/appconfig#Python_app_yaml_Skipping_files
+skip_files:
+# Built-in defaults
+- ^(.*/)?#.*#$
+- ^(.*/)?.*~$
+- ^(.*/)?.*\.py[co]$
+- ^(.*/)?.*/RCS/.*$
+- ^(.*/)?\..*$
+# Custom entries
+- ^(.*/)?.*/node_modules/.*$
