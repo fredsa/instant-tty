@@ -2,6 +2,7 @@ import cgi
 import httplib
 import webapp2
 
+from . import channel
 from . import compute
 from . import error
 from . import jsonutil
@@ -14,7 +15,6 @@ from . import wsgi_config
 from error import Abort
 
 from google.appengine.api import app_identity
-from google.appengine.api import channel
 
 
 # From https://cloud.google.com/console/project/apps~little-black-box/apiui/credential
@@ -142,16 +142,19 @@ class InstanceHandler(AppHandler):
     pass
 
   def post(self):
-    channel.send_message(self.user_id, 'Looking for instance...')
     instance_name = self.user.instance_name
     if not self.user.instance_name:
-      channel.send_message(self.user_id, 'Allocating instance...')
+      channel.send_message(self.user_id, 'Allocating instance ...')
       instance_name = model.AllocateInstance(self.user_id)
-    channel.send_message(self.user_id, 'Retrieving instance details...')
+    channel.send_message(self.user_id, 'Retrieving details for instance {}...'
+                                       .format(instance_name))
     instance = model.GetInstance(instance_name)
     if instance.task_name:
-      Abort(httplib.REQUEST_TIMEOUT, 'Waiting on provisioning task ' + instance.task_name)
-    channel.send_message(self.user_id, 'Instance created.')
+      Abort(httplib.REQUEST_TIMEOUT, 'Waiting on provisioning task {}'
+                                     .format(instance.task_name))
+    channel.send_message(self.user_id, 'Instance {} created with IP address {}'
+                                       .format(instance.instance_name,
+                                               instance.external_ip_addr))
     return {
       'instance_name': instance.instance_name,
       'external_ip_addr': instance.external_ip_addr,

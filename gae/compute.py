@@ -8,6 +8,7 @@ from google.appengine.api import app_identity
 from google.appengine.api import memcache
 from google.appengine.api import urlfetch
 
+from . import channel
 from . import settings
 
 from error import Abort
@@ -45,7 +46,8 @@ COMPUTE_AUTHORIZATION_MEMCACHE_KEY = 'COMPUTE_AUTHORIZATION_MEMCACHE_KEY'
 STARTUP_SCRIPT_URL='https://raw.github.com/fredsa/instant-tty/master/compute-startup.sh'
 
 
-def _Fetch(reason, url, method='GET', payload=None):
+def _Fetch(user_id, reason, url, method='GET', payload=None):
+  channel.send_message(user_id, reason)
   if shared.IsDevMode():
     authorization_value = GetDevModeAccessToken()
   else:
@@ -80,7 +82,7 @@ def SetDevModeAccessToken(access_token, token_type, expires_in):
 
 
 def ListInstances():
-  r = _Fetch('LIST INSTANCES',url=COMPUTE_INSTANCES_URL)
+  r = _Fetch(user_id, 'LIST INSTANCES',url=COMPUTE_INSTANCES_URL)
   return [item['name'] for item in r['items']]
 
 
@@ -93,16 +95,18 @@ def _IsDesiredImage(image):
   return True
 
 
-def ListDebianCloudImages():
-  r = _Fetch('images.list(debian && !deprecated)',
+def ListDebianCloudImages(user_id):
+  r = _Fetch(user_id,
+             'images.list(debian && !deprecated)',
              url=DEBIAN_CLOUD_IMAGES_URL)
   return [item['selfLink'] for item in r['items'] if _IsDesiredImage(item)]
 
 
 def CreateDisk(user_id, disk_name):
-  imageurl = ListDebianCloudImages()[0]
+  imageurl = ListDebianCloudImages(user_id)[0]
   url = '{}?sourceImage={}'.format(COMPUTE_DISKS_URL, imageurl)
-  r = _Fetch('disks.create({!r})'.format(disk_name),
+  r = _Fetch(user_id,
+             'disks.create({!r})'.format(disk_name),
              url=url,
              method='POST',
              payload=json.dumps({
@@ -113,7 +117,7 @@ def CreateDisk(user_id, disk_name):
 
 def _GetDisk(user_id, disk_name):
   url = '{}/{}'.format(COMPUTE_DISKS_URL, disk_name)
-  r = _Fetch('disks.get({!r})'.format(disk_name), url=url)
+  r = _Fetch(user_id, 'disks.get({!r})'.format(disk_name), url=url)
   return r
 
 
@@ -128,7 +132,7 @@ def GetOrCreateDisk(user_id, disk_name):
 
 def GetInstance(user_id, instance_name):
   url = '{}/{}'.format(COMPUTE_INSTANCES_URL, instance_name)
-  r = _Fetch('instances.get({!r})'.format(instance_name), url=url)
+  r = _Fetch(user_id, 'instances.get({!r})'.format(instance_name), url=url)
   return r
 
 
@@ -167,7 +171,8 @@ def _CreateInstance(user_id, instance_name, metadata=None):
      }
    ],
   })
-  r = _Fetch('instances.insert({!r})'.format(instance_name),
+  r = _Fetch(user_id,
+             'instances.insert({!r})'.format(instance_name),
              url=COMPUTE_INSTANCES_URL,
              method='POST',
              payload=payload)

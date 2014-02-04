@@ -13,3 +13,28 @@ BODY {
 .alert-reduced-margin {
   margin-bottom: 2px;
 }
+
+.channel-controller {
+  margin-top: 1em;
+}
+
+  .channel-container {
+    height: 6em;
+    overflow: hidden;
+    position: relative;
+  }
+
+    .channel-message-list {
+      width: 100%;
+      position: absolute;
+      bottom: 0px;
+      margin: 1em 0em 0em 1em;
+    }
+
+    .channel-message-list DIV {
+      opacity: 0.5;
+    }
+
+    .channel-message-list DIV:last-child {
+      opacity: 1.0;
+    }

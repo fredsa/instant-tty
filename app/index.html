@@ -52,15 +52,20 @@
 </head>
 <body ng-cloak>
 
-  <div ng-view></div>
-
-  <div ng-controller="ChannelController">
-    <div ng-repeat="msg in messages">{{msg}}</div>
-  </div>
-
   <div ng-controller="AlertController">
     <!-- use ALERT here so CLOSE attribute triggers close widget -->
     <alert ng-repeat="alert in alerts()" close="closeAlert($index)" class="alert alert-{{alert.type}} alert-pre alert-reduced-margin"><i class="{{alert.icon}}"></i> <span ng-bind-html="alert.htmlMsg"></span>{{alert.msg}}</alert>
+  </div>
+
+  <div ng-view></div>
+
+  <div ng-controller="ChannelController" class="channel-controller">
+    <div>Most recent status:</div>
+    <div class="channel-container">
+      <div class="channel-message-list">
+        <div ng-repeat="msg in messages">{{msg}}</div>
+      </div>
+    </div>
   </div>
 
 </body>

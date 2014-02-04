@@ -28,14 +28,23 @@ angular.module('myApp.controllers', [])
 
   $scope.messages = [];
 
+  appConfig.then(function(config) {
+    $scope.channel = new goog.appengine.Channel(config.channel_token);
+    $scope.socket = $scope.channel.open();
+    $scope.socket.onopen = $scope.onopen;
+    $scope.socket.onclose = $scope.onclose;
+    $scope.socket.onerror = $scope.onerror;
+    $scope.socket.onmessage = $scope.onmessage;
+  });
+
   $scope.onopen = function() {
-    $log.debug('socket.onopen()');
+    // $log.debug('socket.onopen()');
     retry_delay_ms = INITIAL_RETRY_DELAY_MS;
     $scope.$apply();
   };
 
   $scope.onclose = function() {
-    $log.debug('socket.onclose()');
+    // $log.debug('socket.onclose()');
     $scope.socket = undefined;
     maybe_open_socket_with_backoff();
     $scope.$apply();
@@ -50,22 +59,10 @@ angular.module('myApp.controllers', [])
   };
 
   $scope.onmessage = function(msg) {
-    $log.debug('socket.onmessage(', msg, ')');
+    // $log.debug('socket.onmessage(', msg, ')');
     $scope.messages.push(msg.data);
     $scope.$apply();
   }
-
-  $scope.$on('$routeChangeSuccess', function() {
-    $log.log('$routeChangeSuccess')
-    appConfig.then(function(config) {
-      $scope.channel = new goog.appengine.Channel(config.channel_token);
-      $scope.socket = $scope.channel.open();
-      $scope.socket.onopen = $scope.onopen;
-      $scope.socket.onclose = $scope.onclose;
-      $scope.socket.onerror = $scope.onerror;
-      $scope.socket.onmessage = $scope.onmessage;
-    })
-  });
 }])
 
 .controller('OAuth2Controller', ['$scope', '$http', '$location', '$timeout', function($scope, $http, $location, $timeout) {
@@ -99,7 +96,7 @@ angular.module('myApp.controllers', [])
 
 }])
 
-.controller('MainController', ['$scope', '$http', '$window', '$location', '$timeout', 'Alert', 'config', function($scope, $http, $window, $location, $timeout, Alert, config) {
+.controller('MainController', ['$scope', '$log', '$http', '$window', '$location', '$timeout', 'Alert', 'config', function($scope, $log, $http, $window, $location, $timeout, Alert, config) {
   $scope.status = 'Loading...';
   $scope.config = config;
 
@@ -122,9 +119,7 @@ angular.module('myApp.controllers', [])
     })
     .error(function(data, status, headers, config) {
       // TODO: Exponential backoff
-      var delay = 2;
-      console.log('data',data)
-      console.log('status',status)
+      var delay = 3;
       $scope.status = 'Will try again in ' + delay + ' seconds.';
       $timeout(function() {
         Alert.clear();

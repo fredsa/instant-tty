@@ -40,7 +40,7 @@ def GetOrCreateUser(user_id):
 @ndb.non_transactional
 def _MakeInstanceNames(size):
   id_range = Instance.allocate_ids(size=size)
-  return ['instance{}'.format(i) for i in range(id_range[0], id_range[1] + 1)]
+  return ['scratch{}'.format(i) for i in range(id_range[0], id_range[1] + 1)]
 
 
 @ndb.transactional(xg=True)
