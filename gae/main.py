@@ -1,4 +1,5 @@
 import cgi
+import httplib
 import json
 import webapp2
 
@@ -9,6 +10,8 @@ from . import model
 from . import settings
 from . import shared
 from . import wsgi_config
+
+from error import Abort
 
 
 _JSON_ENCODER = json.JSONEncoder()
@@ -146,10 +149,12 @@ class InstanceHandler(AppHandler):
     pass
 
   def jsonpost(self):
-    if self.user.instance_name:
-      instance = model.GetInstance(self.user.instance_name)
-    else:
-      instance = model.AllocateInstance(self.user.key.id())
+    instance_name = self.user.instance_name
+    if not self.user.instance_name:
+      instance_name = model.AllocateInstance(self.user.key.id())
+    instance = model.GetInstance(instance_name)
+    if instance.task_name:
+      Abort(httplib.REQUEST_TIMEOUT, 'Waiting on provisioning task ' + instance.task_name)
     return {
       'instance_name': instance.instance_name,
       'external_ip_addr': instance.external_ip_addr,

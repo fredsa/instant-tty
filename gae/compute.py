@@ -134,7 +134,7 @@ def GetInstance(instance_name):
 
 def _CreateInstance(instance_name, metadata=None):
   metadata = metadata or {}
-  metadata['startup-scripts-url'] = STARTUP_SCRIPT_URL
+  metadata['startup-script-url'] = STARTUP_SCRIPT_URL
   metadata_items = [{'key': k, 'value': v} for k,v in metadata.iteritems()]
   disk = GetOrCreateDisk(instance_name)
   diskurl = disk['selfLink']
@@ -151,6 +151,8 @@ def _CreateInstance(instance_name, metadata=None):
    'disks': [{
      'boot': True,
      'type': 'PERSISTENT',
+     'mode': 'READ_WRITE',
+     'deviceName': instance_name,
      'source': diskurl,
    }],
    'metadata': {
@@ -174,10 +176,9 @@ def _CreateInstance(instance_name, metadata=None):
 def GetOrCreateInstance(instance_name, metadata):
   try:
     instance = GetInstance(instance_name)
-    return instance
   except:
     operation = _CreateInstance(instance_name, metadata)
     instance = GetInstance(instance_name)
-    return instance
+  return instance
 
 

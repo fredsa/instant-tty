@@ -55,7 +55,7 @@ angular.module('myApp.controllers', [])
 
 }])
 
-.controller('MainController', ['$scope', '$http', '$window', '$location', 'config', function($scope, $http, $window, $location, config) {
+.controller('MainController', ['$scope', '$http', '$window', '$location', '$timeout', 'config', function($scope, $http, $window, $location, $timeout, config) {
   $scope.status = 'Loading...';
   $scope.config = config;
 
@@ -75,6 +75,12 @@ angular.module('myApp.controllers', [])
       $scope.status = 'Opening a new window to ' + data.instance_name +
                       ' with IP address ' +  data.external_ip_addr;
       $window.open('http://' + data.external_ip_addr);
+    })
+    .error(function(data, status, headers, config) {
+      // TODO: Exponential backoff
+      var delay = 2;
+      $scope.status = 'Will try again in ' + delay + ' seconds: ' + data;
+      $timeout($scope.newinstance, delay * 1000);
     });
   }
 }]);

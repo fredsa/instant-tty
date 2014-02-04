@@ -66,10 +66,9 @@ angular.module('myApp.services', [])
     },
 
    'responseError': function(err) {
-    console.log('err',err)
       if (err.status && err.headers && err.headers('X-App-Error')) {
-        Alert.error('X-App-Error HTTP ' + err.status + '\n' + dump(err.data));
-      } if (err.status && err.config && err.data) {
+        // Alert.info('X-App-Error HTTP ' + err.status + '\n' + dump(err.data));
+      } else if (err.status && err.config && err.data) {
         Alert.error('$http ' + err.status + ' ERROR:\n' + dump(err.data) +
                     '\nWITH CONFIG:\n' + dump(err.config));
       } else {

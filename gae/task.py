@@ -22,11 +22,14 @@ class InstanceHandler(webapp2.RequestHandler):
       'plaintext_secret': plaintext_secret,
     }
     instance = compute.GetOrCreateInstance(instance_name, metadata)
-    ip = instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-    if not instance:
+    if not instance or instance['status'] != 'RUNNING':
       self.error(httplib.REQUEST_TIMEOUT)
       return
-    model.MarkInstanceTaskComplete(instance_name, external_ip_addr=ip)
+    networkInterfaces = instance['networkInterfaces']
+    accessConfigs = networkInterfaces[0]['accessConfigs']
+    external_ip_addr = accessConfigs[0]['natIP']
+    model.MarkInstanceTaskComplete(instance_name,
+                                   external_ip_addr=external_ip_addr)
 
 
 APPLICATION = webapp2.WSGIApplication([

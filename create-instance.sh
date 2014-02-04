@@ -35,6 +35,7 @@ shift
 
 ZONE=us-central1-a
 MACHINE_TYPE=f1-micro
+PLAINTEXT_SECRET=secret43
 
 echo "LISTING DEBIAN IMAGES:"
 IMAGE=$(
@@ -61,6 +62,7 @@ echo "  Zone                  : $ZONE"
 echo "  Image                 : $IMAGE"
 echo "  Machine type          : $MACHINE_TYPE"
 echo "  Startup script URL    : $STARTUP_SCRIPT_URL"
+echo "  Plaintext secret      : $PLAINTEXT_SECRET"
 echo "  Startup archive       : $gsfile"
 echo "  Service account scopes: $scopes"
 echo ""
@@ -80,6 +82,7 @@ gcutil addinstance $instancename \
   --machine_type $MACHINE_TYPE \
   --image $IMAGE \
   --metadata="startup-script-url:$STARTUP_SCRIPT_URL" \
+  --metadata="plaintext_secret:$PLAINTEXT_SECRET" \
   --service_account_scopes=$scopes \
   --zone $ZONE \
   --project $projectid
