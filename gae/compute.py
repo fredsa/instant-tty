@@ -99,7 +99,7 @@ def ListDebianCloudImages():
   return [item['selfLink'] for item in r['items'] if _IsDesiredImage(item)]
 
 
-def CreateDisk(disk_name):
+def CreateDisk(user_id, disk_name):
   imageurl = ListDebianCloudImages()[0]
   url = '{}?sourceImage={}'.format(COMPUTE_DISKS_URL, imageurl)
   r = _Fetch('disks.create({!r})'.format(disk_name),
@@ -111,32 +111,32 @@ def CreateDisk(disk_name):
   return r
 
 
-def _GetDisk(disk_name):
+def _GetDisk(user_id, disk_name):
   url = '{}/{}'.format(COMPUTE_DISKS_URL, disk_name)
   r = _Fetch('disks.get({!r})'.format(disk_name), url=url)
   return r
 
 
-def GetOrCreateDisk(disk_name):
+def GetOrCreateDisk(user_id, disk_name):
   try:
-    disk = _GetDisk(disk_name)
+    disk = _GetDisk(user_id, disk_name)
     return disk
   except:
-    disk = CreateDisk(disk_name)
+    disk = CreateDisk(user_id, disk_name)
     return None
 
 
-def GetInstance(instance_name):
+def GetInstance(user_id, instance_name):
   url = '{}/{}'.format(COMPUTE_INSTANCES_URL, instance_name)
   r = _Fetch('instances.get({!r})'.format(instance_name), url=url)
   return r
 
 
-def _CreateInstance(instance_name, metadata=None):
+def _CreateInstance(user_id, instance_name, metadata=None):
   metadata = metadata or {}
   metadata['startup-script-url'] = STARTUP_SCRIPT_URL
   metadata_items = [{'key': k, 'value': v} for k,v in metadata.iteritems()]
-  disk = GetOrCreateDisk(instance_name)
+  disk = GetOrCreateDisk(user_id, instance_name)
   diskurl = disk['selfLink']
   payload = json.dumps({
    'machineType': COMPUTE_MACHINE_TYPE_URL,
@@ -173,12 +173,12 @@ def _CreateInstance(instance_name, metadata=None):
              payload=payload)
   return r
 
-def GetOrCreateInstance(instance_name, metadata):
+def GetOrCreateInstance(user_id, instance_name, metadata):
   try:
-    instance = GetInstance(instance_name)
+    instance = GetInstance(user_id, instance_name)
   except:
-    operation = _CreateInstance(instance_name, metadata)
-    instance = GetInstance(instance_name)
+    operation = _CreateInstance(user_id, instance_name, metadata)
+    instance = GetInstance(user_id, instance_name)
   return instance
 
 
