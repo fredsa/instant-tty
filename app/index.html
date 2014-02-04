@@ -40,7 +40,8 @@
       'js/services.js',
       'js/controllers.js',
       'js/filters.js',
-      'js/directives.js'
+      'js/directives.js',
+      '/_ah/channel/jsapi',
     ], function() {
       // when all is done, execute bootstrap angular application
       angular.bootstrap(document, ['myApp']);
@@ -52,6 +53,10 @@
 <body ng-cloak>
 
   <div ng-view></div>
+
+  <div ng-controller="ChannelController">
+    {{last_message}}
+  </div>
 
   <div ng-controller="AlertController">
     <!-- use ALERT here so CLOSE attribute triggers close widget -->

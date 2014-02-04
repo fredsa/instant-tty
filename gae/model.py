@@ -6,6 +6,8 @@ from . import settings
 from . import shared
 from error import Abort
 
+from google.appengine.api import channel
+
 
 class Instance(ndb.Model):
   """A Model to store instances."""
@@ -14,6 +16,7 @@ class Instance(ndb.Model):
   external_ip_addr = ndb.StringProperty(required=False, indexed=False)
   task_name = ndb.StringProperty(required=False, indexed=False)
   user_id = ndb.StringProperty(required=False, indexed=False)
+
 
 class Instances(ndb.Model):
   """A Model to store all instances."""
@@ -71,6 +74,7 @@ def AllocateInstance(user_id):
     instances = Instances(key=INSTANCES_KEY)
 
   if user.instance_name:
+    channel.send_message(user_id, 'User already has instance {}'.format(user.instance_name))
     Abort('User {} already has instance {}'.format(user_id, user.instance_name))
 
   available_instances = len([instance for instance in instances.instances

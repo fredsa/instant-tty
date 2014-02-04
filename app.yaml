@@ -23,6 +23,12 @@ handlers:
 - url: /
   static_dir: app
 
+
+# https://developers.google.com/appengine/docs/python/config/appconfig#Inbound_Services
+inbound_services:
+- channel_presence
+
+
 # See https://developers.google.com/appengine/docs/python/config/appconfig#Python_app_yaml_Skipping_files
 skip_files:
 # Built-in defaults

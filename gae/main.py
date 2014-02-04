@@ -14,6 +14,7 @@ from . import wsgi_config
 from error import Abort
 
 from google.appengine.api import app_identity
+from google.appengine.api import channel
 
 
 # From https://cloud.google.com/console/project/apps~little-black-box/apiui/credential
@@ -45,6 +46,10 @@ class AppHandler(JsonHandler):
   @webapp2.cached_property
   def user(self):
     return self.request.environ['app.user']
+
+  @webapp2.cached_property
+  def user_id(self):
+    return self.user.key.id()
 
   def handle_exception(self, exception, debug_mode):
     """Called if this handler throws an exception during execution.
@@ -111,8 +116,10 @@ class ConfigHandler(AppHandler):
     pass
 
   def get(self):
+    shared.w('creating channel ' + self.user_id)
     map = {
-      'your': 'config',
+      'user_id': self.user_id,
+      'channel_token': channel.create_channel(self.user_id),
     }
     if shared.IsDevMode() and not compute.GetDevModeAccessToken():
       map['oauth2_url'] = self.MakeOauth2Url()
@@ -136,12 +143,16 @@ class InstanceHandler(AppHandler):
     pass
 
   def post(self):
+    channel.send_message(self.user_id, 'Looking for instance...')
     instance_name = self.user.instance_name
     if not self.user.instance_name:
-      instance_name = model.AllocateInstance(self.user.key.id())
+      channel.send_message(self.user_id, 'Allocating instance...')
+      instance_name = model.AllocateInstance(self.user_id)
+    channel.send_message(self.user_id, 'Retrieving instance details...')
     instance = model.GetInstance(instance_name)
     if instance.task_name:
       Abort(httplib.REQUEST_TIMEOUT, 'Waiting on provisioning task ' + instance.task_name)
+    channel.send_message(self.user_id, 'Instance created.')
     return {
       'instance_name': instance.instance_name,
       'external_ip_addr': instance.external_ip_addr,

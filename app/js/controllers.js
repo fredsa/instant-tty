@@ -21,6 +21,51 @@ angular.module('myApp.controllers', [])
   });
 }])
 
+.controller('ChannelController', ['$scope', '$log', 'appConfig', function($scope, $log, appConfig) {
+  var INITIAL_RETRY_DELAY_MS = 500;
+
+  var retry_delay_ms = INITIAL_RETRY_DELAY_MS;
+
+  $scope.onopen = function() {
+    $log.debug('socket.onopen()');
+    retry_delay_ms = INITIAL_RETRY_DELAY_MS;
+    $scope.$apply();
+  };
+
+  $scope.onclose = function() {
+    $log.debug('socket.onclose()');
+    $scope.socket = undefined;
+    maybe_open_socket_with_backoff();
+    $scope.$apply();
+  };
+
+  $scope.onerror = function(err) {
+    // expect err.code and err.description to be set
+    // err.description values include 'Invalid+token.' and 'Token+timed+out.'
+    $log.debug('socket.onerror(', err, ')');
+    maybe_open_socket_with_backoff();
+    $scope.$apply();
+  };
+
+  $scope.onmessage = function(msg) {
+    $log.debug('socket.onmessage(', msg, ')');
+    $scope.last_message = msg.data;
+    $scope.$apply();
+  }
+
+  $scope.$on('$routeChangeSuccess', function() {
+    $log.log('$routeChangeSuccess')
+    appConfig.then(function(config) {
+      $scope.channel = new goog.appengine.Channel(config.channel_token);
+      $scope.socket = $scope.channel.open();
+      $scope.socket.onopen = $scope.onopen;
+      $scope.socket.onclose = $scope.onclose;
+      $scope.socket.onerror = $scope.onerror;
+      $scope.socket.onmessage = $scope.onmessage;
+    })
+  });
+}])
+
 .controller('OAuth2Controller', ['$scope', '$http', '$location', '$timeout', function($scope, $http, $location, $timeout) {
   $scope.status = 'Requesting API access...';
 
@@ -39,9 +84,6 @@ angular.module('myApp.controllers', [])
     var access_token = map.access_token;
     $http.post('/api/oauth2', map)
     .success(function() {
-      // console.log('BEFORE', $scope.config)
-      // delete $scope.config.oauth2_url;
-      // console.log('AFTER', $scope.config)
       $scope.status = 'API access token received. Loading...';
       $timeout(function() {
         $location.path('/').hash('');
