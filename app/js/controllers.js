@@ -22,7 +22,7 @@ angular.module('myApp.controllers', [])
 }])
 
 .controller('OAuth2Controller', ['$scope', '$http', '$location', '$timeout', function($scope, $http, $location, $timeout) {
-  $scope.status = "Requesting API access...";
+  $scope.status = 'Requesting API access...';
 
   function _params2hash(params) {
     var map = {};
@@ -42,7 +42,7 @@ angular.module('myApp.controllers', [])
       // console.log('BEFORE', $scope.config)
       // delete $scope.config.oauth2_url;
       // console.log('AFTER', $scope.config)
-      $scope.status = "API access token received. Loading...";
+      $scope.status = 'API access token received. Loading...';
       $timeout(function() {
         $location.path('/').hash('');
       }, 1000);
@@ -56,7 +56,7 @@ angular.module('myApp.controllers', [])
 }])
 
 .controller('MainController', ['$scope', '$http', '$window', '$location', 'config', function($scope, $http, $window, $location, config) {
-  $scope.status = "Loading...";
+  $scope.status = 'Loading...';
   $scope.config = config;
 
   $scope.$on('$routeChangeSuccess', function() {
@@ -69,10 +69,12 @@ angular.module('myApp.controllers', [])
   });
 
   $scope.newinstance = function() {
-    $scope.status = "Requesting instance...";
+    $scope.status = 'Requesting instance...';
     $http.post('/api/instance')
     .success(function(data, status, headers, config) {
-      $scope.status = "Got instance: " + data.instance_name;
+      $scope.status = 'Opening a new window to ' + data.instance_name +
+                      ' with IP address ' +  data.external_ip_addr;
+      $window.open('http://' + data.external_ip_addr);
     });
   }
 }]);

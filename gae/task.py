@@ -21,11 +21,12 @@ class InstanceHandler(webapp2.RequestHandler):
     metadata = {
       'plaintext_secret': plaintext_secret,
     }
-    instance_name = compute.GetOrCreateInstance(instance_name, metadata)
-    if not instance_name:
+    instance = compute.GetOrCreateInstance(instance_name, metadata)
+    ip = instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+    if not instance:
       self.error(httplib.REQUEST_TIMEOUT)
       return
-    model.MarkInstanceTaskComplete(instance_name)
+    model.MarkInstanceTaskComplete(instance_name, external_ip_addr=ip)
 
 
 APPLICATION = webapp2.WSGIApplication([

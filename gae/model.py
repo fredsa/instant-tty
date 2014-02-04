@@ -11,6 +11,7 @@ class Instance(ndb.Model):
   """A Model to store instances."""
   instance_name = ndb.StringProperty(required=True, indexed=True)
   plaintext_secret = ndb.StringProperty(required=True, indexed=False)
+  external_ip_addr = ndb.StringProperty(required=False, indexed=False)
   task_name = ndb.StringProperty(required=False, indexed=False)
   user_id = ndb.StringProperty(required=False, indexed=False)
 
@@ -40,7 +41,7 @@ def _MakeInstanceNames(size):
 
 
 @ndb.transactional(xg=True)
-def MarkInstanceTaskComplete(instance_name):
+def MarkInstanceTaskComplete(instance_name, external_ip_addr):
   # make sure we have a transactionally consistent view
   instances = INSTANCES_KEY.get()
 
@@ -48,9 +49,18 @@ def MarkInstanceTaskComplete(instance_name):
     if instance.instance_name == instance_name:
       assert instance.task_name == shared.GetCurrentTaskName()
       instance.task_name = None
+      instance.external_ip_addr = external_ip_addr
       instances.put()
       return
   shared.w('Unable to find instance {}'.format(instance_name))
+
+
+def GetInstance(instance_name):
+  instances = INSTANCES_KEY.get()
+  for instance in instances.instances:
+    if instance.instance_name == instance_name:
+      return instance
+  shared.e('Unable to find instance {}'.format(instance_name))
 
 
 @ndb.transactional(xg=True)

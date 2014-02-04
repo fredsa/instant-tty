@@ -146,11 +146,13 @@ class InstanceHandler(AppHandler):
     pass
 
   def jsonpost(self):
-    instance_name = self.user.instance_name
-    if not instance_name:
-      instance_name = model.AllocateInstance(self.user.key.id())
+    if self.user.instance_name:
+      instance = model.GetInstance(self.user.instance_name)
+    else:
+      instance = model.AllocateInstance(self.user.key.id())
     return {
-      'instance_name': instance_name,
+      'instance_name': instance.instance_name,
+      'external_ip_addr': instance.external_ip_addr,
     }
 
 

@@ -174,9 +174,10 @@ def _CreateInstance(instance_name, metadata=None):
 def GetOrCreateInstance(instance_name, metadata):
   try:
     instance = GetInstance(instance_name)
-    return instance_name
+    return instance
   except:
-    instance = _CreateInstance(instance_name, metadata)
-    return None
+    operation = _CreateInstance(instance_name, metadata)
+    instance = GetInstance(instance_name)
+    return instance
 
 
