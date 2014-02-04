@@ -74,7 +74,7 @@ class AppHandler(webapp2.RequestHandler):
             '&redirect_uri={}'
             '&scope={}'
             # '&state=foo'
-            '&approval_prompt=force'
+            # '&approval_prompt=force'
             # '&login_hint={}'
             '&include_granted_scopes=false'
             .format(CLIENT_ID, callbackuri, scopes))
@@ -146,8 +146,6 @@ class InstanceHandler(AppHandler):
     pass
 
   def jsonpost(self):
-    # import compute; compute.GetOrCreateInstance('xyz'); return {'instance_name': 'xyz'}
-
     instance_name = self.user.instance_name
     if not instance_name:
       instance_name = model.AllocateInstance(self.user.key.id())

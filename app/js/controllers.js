@@ -22,8 +22,7 @@ angular.module('myApp.controllers', [])
 }])
 
 .controller('OAuth2Controller', ['$scope', '$http', '$location', '$timeout', function($scope, $http, $location, $timeout) {
-  $scope.status = "OAuth2Controller initial state";
-  // $scope.config = config;
+  $scope.status = "Requesting API access...";
 
   function _params2hash(params) {
     var map = {};
@@ -38,13 +37,12 @@ angular.module('myApp.controllers', [])
     // access_token, token_type, expires_in
     var map = _params2hash($location.hash());
     var access_token = map.access_token;
-    console.log('access_token', access_token )
     $http.post('/api/oauth2', map)
     .success(function() {
       // console.log('BEFORE', $scope.config)
       // delete $scope.config.oauth2_url;
       // console.log('AFTER', $scope.config)
-      $scope.status = "Thank you. OAuth2 access token has been set. Redirecting...";
+      $scope.status = "API access token received. Loading...";
       $timeout(function() {
         $location.path('/').hash('');
       }, 1000);
@@ -58,7 +56,7 @@ angular.module('myApp.controllers', [])
 }])
 
 .controller('MainController', ['$scope', '$http', '$window', '$location', 'config', function($scope, $http, $window, $location, config) {
-  $scope.status = "Awaiting your command";
+  $scope.status = "Loading...";
   $scope.config = config;
 
   $scope.$on('$routeChangeSuccess', function() {
