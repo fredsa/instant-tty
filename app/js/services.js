@@ -71,7 +71,11 @@ angular.module('myApp.services', [])
 
    'responseError': function(err) {
       if (err.status && err.headers && err.headers('X-App-Error')) {
-        // Alert.info('X-App-Error HTTP ' + err.status + '\n' + dump(err.data));
+        if (err.status == 408) {
+          Alert.info(err.data['app-error']);
+        } else {
+          Alert.error('App Error ' + err.status + ': ' + err.data['app-error']);
+        }
       } else if (err.status && err.headers && err.headers('Content-Type').indexOf('text/html') == 0) {
         // TODO: handle App Engine's default HTML tracebacks with $sce.trustAs
         Alert.trustedHtmlError($sce.trustAsHtml(err.data));

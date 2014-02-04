@@ -5,6 +5,7 @@ import logging
 import sys
 import traceback
 
+from . import jsonutil
 from . import settings
 
 
@@ -36,7 +37,8 @@ def MakeErrorResponse(exception, debug_mode):
     response body.
   """
   headers = [
-      ('content-type', 'text/plain; charset=utf-8'),
+      ('Content-Type', settings.JSON_MIME_TYPE),
+      ('X-App-Error', 'True'),
       # Note App Engine automatically sets a 'Date' header for us. See
       # https://developers.google.com/appengine/docs/python/runtime#Responses
       ('Expires', settings.LONG_AGO),
@@ -44,9 +46,6 @@ def MakeErrorResponse(exception, debug_mode):
   ]
   if isinstance(exception, AppError):
     status_code = exception.status_code
-    headers.append(
-        ('X-App-Error', 'True')
-    )
     message = exception.message
   else:
     logging.exception(exception)
@@ -58,6 +57,7 @@ def MakeErrorResponse(exception, debug_mode):
       message = ('\n{}'.format('\n'.join(formatted_exception)))
     else:
       message = 'Ouch. How awkward.'
+  message = jsonutil.tojson({'app-error': message})
   status = '{} {}'.format(status_code, httplib.responses[status_code])
   body = message
   return status, headers, body

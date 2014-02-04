@@ -55,7 +55,7 @@ angular.module('myApp.controllers', [])
 
 }])
 
-.controller('MainController', ['$scope', '$http', '$window', '$location', '$timeout', 'config', function($scope, $http, $window, $location, $timeout, config) {
+.controller('MainController', ['$scope', '$http', '$window', '$location', '$timeout', 'Alert', 'config', function($scope, $http, $window, $location, $timeout, Alert, config) {
   $scope.status = 'Loading...';
   $scope.config = config;
 
@@ -79,8 +79,13 @@ angular.module('myApp.controllers', [])
     .error(function(data, status, headers, config) {
       // TODO: Exponential backoff
       var delay = 2;
-      $scope.status = 'Will try again in ' + delay + ' seconds: ' + data;
-      $timeout($scope.newinstance, delay * 1000);
+      console.log('data',data)
+      console.log('status',status)
+      $scope.status = 'Will try again in ' + delay + ' seconds.';
+      $timeout(function() {
+        Alert.clear();
+        $scope.newinstance();
+      }, delay * 1000);
     });
   }
 }]);

@@ -1,10 +1,10 @@
 import cgi
 import httplib
-import json
 import webapp2
 
 from . import compute
 from . import error
+from . import jsonutil
 from . import middleware
 from . import model
 from . import settings
@@ -16,12 +16,6 @@ from error import Abort
 from google.appengine.api import app_identity
 
 
-_JSON_ENCODER = json.JSONEncoder()
-_JSON_ENCODER.indent = 4
-_JSON_ENCODER.sort_keys = True
-
-_JSON_DECODER = json.JSONDecoder()
-
 # From https://cloud.google.com/console/project/apps~little-black-box/apiui/credential
 CLIENT_ID = '638064416490.apps.googleusercontent.com'
 
@@ -32,28 +26,17 @@ else:
   redirect_uri = 'https://{}/'.format(app_identity.get_default_version_hostname())
 
 
-def tojson(r):
-  """Converts a Python object to JSON."""
-  return _JSON_ENCODER.encode(r)
-
-
-def fromjson(json):
-  """Converts a JSON object into a Python object."""
-  if json == '':
-    return None
-  return _JSON_DECODER.decode(json)
-
-
 class JsonHandler(webapp2.RequestHandler):
   """Convenience request handler for handler JSON requests and responses."""
 
   def dispatch(self):
-    self.request.data = fromjson(self.request.body)
+    self.request.data = jsonutil.fromjson(self.request.body)
     r = super(JsonHandler, self).dispatch()
-    self.response.headers['Content-Type'] = settings.JSON_MIME_TYPE
-    # JSON Vulnerability Protection, see http://docs.angularjs.org/api/ng.$http
-    self.response.write(")]}',\n")
-    self.response.write(tojson(r))
+    if self.response.headers['Content-Type'] != settings.JSON_MIME_TYPE:
+      self.response.headers['Content-Type'] = settings.JSON_MIME_TYPE
+      # JSON Vulnerability Protection, see http://docs.angularjs.org/api/ng.$http
+      self.response.write(")]}',\n")
+      self.response.write(jsonutil.tojson(r))
 
 
 class AppHandler(JsonHandler):
@@ -116,8 +99,8 @@ class AppHandler(JsonHandler):
       return
 
     content_type = self.request.headers.get('Content-Type')
-    if content_type and content_type.split(';')[0] == 'application/json':
-      self.request.data = json.loads(self.request.body)
+    if content_type and content_type.split(';')[0] == settings.JSON_MIME_TYPE:
+      self.request.data = jsonutil.fromjson(self.request.body)
     # Exceptions in super.dispatch are automatically routed to handle_exception
     super(AppHandler, self).dispatch()
 
