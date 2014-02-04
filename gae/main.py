@@ -13,6 +13,8 @@ from . import wsgi_config
 
 from error import Abort
 
+from google.appengine.api import app_identity
+
 
 _JSON_ENCODER = json.JSONEncoder()
 _JSON_ENCODER.indent = 4
