@@ -48,6 +48,6 @@ time (
   echo "Launching server..."
   (
     cd instant-tty
-    ./term.sh --port 80
+    ./term.sh --port 80 &
   )
 )
