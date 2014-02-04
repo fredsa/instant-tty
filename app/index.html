@@ -55,7 +55,7 @@
 
   <div ng-controller="AlertController">
     <!-- use ALERT here so CLOSE attribute triggers close widget -->
-    <alert ng-repeat="alert in alerts()" close="closeAlert($index)" class="alert alert-{{alert.type}} alert-pre alert-reduced-margin"><i class="{{alert.icon}}"></i> {{alert.msg}}</alert>
+    <alert ng-repeat="alert in alerts()" close="closeAlert($index)" class="alert alert-{{alert.type}} alert-pre alert-reduced-margin"><i class="{{alert.icon}}"></i> <span ng-bind-html="alert.htmlMsg"></span>{{alert.msg}}</alert>
   </div>
 
 </body>

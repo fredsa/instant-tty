@@ -38,6 +38,10 @@ angular.module('myApp.services', [])
       alert_list.push({type: 'error', icon: 'icon-exclamation-sign', msg: msg});
     },
 
+    trustedHtmlError: function(htmlmsg) {
+      alert_list.push({type: 'error', icon: 'icon-exclamation-sign', htmlmsg: htmlmsg});
+    },
+
     alerts: function() {
       return alert_list;
     },
@@ -51,7 +55,7 @@ angular.module('myApp.services', [])
   return Alert;
 }])
 
-.factory('appHttpInterceptor', ['$q', '$log', '$window', 'Alert' ,function($q, $log, $window, Alert) {
+.factory('appHttpInterceptor', ['$q', '$log', '$window', '$sce', 'Alert' ,function($q, $log, $window, $sce, Alert) {
   return {
     'request': function(config) {
       return config || $q.when(config);
@@ -68,6 +72,9 @@ angular.module('myApp.services', [])
    'responseError': function(err) {
       if (err.status && err.headers && err.headers('X-App-Error')) {
         // Alert.info('X-App-Error HTTP ' + err.status + '\n' + dump(err.data));
+      } else if (err.status && err.headers && err.headers('Content-Type').indexOf('text/html') == 0) {
+        // TODO: handle App Engine's default HTML tracebacks with $sce.trustAs
+        Alert.trustedHtmlError($sce.trustAsHtml(err.data));
       } else if (err.status && err.config && err.data) {
         Alert.error('$http ' + err.status + ' ERROR:\n' + dump(err.data) +
                     '\nWITH CONFIG:\n' + dump(err.config));
