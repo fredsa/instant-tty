@@ -1,6 +1,7 @@
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
+from . import secret
 from . import settings
 from . import shared
 from error import Abort
@@ -9,6 +10,7 @@ from error import Abort
 class Instance(ndb.Model):
   """A Model to store instances."""
   instance_name = ndb.StringProperty(required=True, indexed=True)
+  plaintext_secret = ndb.StringProperty(required=True, indexed=False)
   task_name = ndb.StringProperty(required=False, indexed=False)
   user_id = ndb.StringProperty(required=False, indexed=False)
 
@@ -67,11 +69,14 @@ def AllocateInstance(user_id):
   if needed_instances:
     instance_names = _MakeInstanceNames(needed_instances)
     for instance_name in instance_names:
+      plaintext_secret = secret.GenerateRandomString()
       task = taskqueue.add(url='/task/instance', params={
         'instance_name': instance_name,
+        'plaintext_secret': plaintext_secret,
       })
       instance = Instance(
         instance_name=instance_name,
+        plaintext_secret=plaintext_secret,
         task_name=task.name,
         user_id=None,
       )

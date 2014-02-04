@@ -132,7 +132,10 @@ def GetInstance(instance_name):
   return r
 
 
-def _CreateInstance(instance_name):
+def _CreateInstance(instance_name, metadata=None):
+  metadata = metadata or {}
+  metadata['startup-scripts-url'] = STARTUP_SCRIPT_URL
+  metadata_items = [{'key': k, 'value': v} for k,v in metadata.iteritems()]
   disk = GetOrCreateDisk(instance_name)
   diskurl = disk['selfLink']
   payload = json.dumps({
@@ -151,12 +154,7 @@ def _CreateInstance(instance_name):
      'source': diskurl,
    }],
    'metadata': {
-     'items': [
-       {
-         'key': 'startup-script-url',
-         'value': STARTUP_SCRIPT_URL,
-       }
-     ]
+     'items': metadata_items,
    },
    'serviceAccounts': [
      {
@@ -173,12 +171,12 @@ def _CreateInstance(instance_name):
              payload=payload)
   return r
 
-def GetOrCreateInstance(instance_name):
+def GetOrCreateInstance(instance_name, metadata):
   try:
     instance = GetInstance(instance_name)
     return instance_name
   except:
-    instance = _CreateInstance(instance_name)
+    instance = _CreateInstance(instance_name, metadata)
     return None
 
 
