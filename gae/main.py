@@ -44,7 +44,19 @@ def fromjson(json):
   return _JSON_DECODER.decode(json)
 
 
-class AppHandler(webapp2.RequestHandler):
+class JsonHandler(webapp2.RequestHandler):
+  """Convenience request handler for handler JSON requests and responses."""
+
+  def dispatch(self):
+    self.request.data = fromjson(self.request.body)
+    r = super(JsonHandler, self).dispatch()
+    self.response.headers['Content-Type'] = settings.JSON_MIME_TYPE
+    # JSON Vulnerability Protection, see http://docs.angularjs.org/api/ng.$http
+    self.response.write(")]}',\n")
+    self.response.write(tojson(r))
+
+
+class AppHandler(JsonHandler):
   """Convenience request handler with app specific functionality."""
 
   @webapp2.cached_property
@@ -94,16 +106,6 @@ class AppHandler(webapp2.RequestHandler):
     """
     raise NotImplementedError()
 
-  def get(self):
-    r = self.jsonget()
-    self.response.headers['Content-Type'] = settings.JSON_MIME_TYPE
-    self.response.write(tojson(r))
-
-  def post(self):
-    r = self.jsonpost()
-    self.response.headers['Content-Type'] = settings.JSON_MIME_TYPE
-    self.response.write(tojson(r))
-
   def dispatch(self):
     """WSGI request dispatch with automatic JSON parsing."""
     try:
@@ -125,7 +127,7 @@ class ConfigHandler(AppHandler):
   def PerformAccessCheck(self):
     pass
 
-  def jsonget(self):
+  def get(self):
     map = {
       'your': 'config',
     }
@@ -139,7 +141,7 @@ class Oauth2Handler(AppHandler):
   def PerformAccessCheck(self):
     assert shared.IsDevMode()
 
-  def jsonpost(self):
+  def post(self):
     compute.SetDevModeAccessToken(access_token=self.request.data['access_token'],
                                   token_type=self.request.data['token_type'],
                                   expires_in=self.request.data['expires_in'])
@@ -150,7 +152,7 @@ class InstanceHandler(AppHandler):
   def PerformAccessCheck(self):
     pass
 
-  def jsonpost(self):
+  def post(self):
     instance_name = self.user.instance_name
     if not self.user.instance_name:
       instance_name = model.AllocateInstance(self.user.key.id())
