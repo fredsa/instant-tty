@@ -4,5 +4,8 @@
 
 angular.module('myApp.filters', [])
 
-.filter('interpolate', ['version', function(version) {
+.filter('tail', [function() {
+  return function(arr, count) {
+    return arr.slice(-count);
+  };
 }]);

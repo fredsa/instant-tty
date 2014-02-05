@@ -14,27 +14,26 @@ BODY {
   margin-bottom: 2px;
 }
 
-.channel-controller {
+.channel-container {
   margin-top: 1em;
 }
 
-  .channel-container {
-    height: 6em;
-    overflow: hidden;
-    position: relative;
-  }
-
-    .channel-message-list {
-      width: 100%;
-      position: absolute;
-      bottom: 0px;
-      margin: 1em 0em 0em 1em;
+    .channel-msg {
+      white-space: pre;
     }
 
-    .channel-message-list DIV {
-      opacity: 0.5;
+    .channel-msg-4 {
+      opacity: 0.2;
     }
 
-    .channel-message-list DIV:last-child {
+    .channel-msg-3 {
+      opacity: 0.4;
+    }
+
+    .channel-msg-2 {
+      opacity: 0.6;
+    }
+
+    .channel-msg-1 {
       opacity: 1.0;
     }
