@@ -60,9 +60,9 @@
   <div ng-view></div>
 
   <div ng-controller="ChannelController" class="channel-container">
-    <div>Most recent status:</div>
+    <div>Most recent status messages:</div>
     <div class="channel-msg-list">
-      <div ng-repeat="msg in messages | tail:4" class="channel-msg channel-msg-{{messages.length - $index}}">{{msg}}</div>
+      <div ng-repeat="msg in messages | tail:4" class="channel-msg" ng-class="{'channel-msg-last': $last}">{{msg}}</div>
     </div>
   </div>
 

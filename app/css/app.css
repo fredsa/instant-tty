@@ -20,20 +20,9 @@ BODY {
 
     .channel-msg {
       white-space: pre;
-    }
-
-    .channel-msg-4 {
       opacity: 0.2;
     }
 
-    .channel-msg-3 {
-      opacity: 0.4;
-    }
-
-    .channel-msg-2 {
-      opacity: 0.6;
-    }
-
-    .channel-msg-1 {
+    .channel-msg-last {
       opacity: 1.0;
     }
