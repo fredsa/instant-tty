@@ -3,5 +3,5 @@ queue:
   rate: 10/s
   retry_parameters:
     min_backoff_seconds: 5
-    max_backoff_seconds: 10
+    max_backoff_seconds: 30
     max_doublings: 4

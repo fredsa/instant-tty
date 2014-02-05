@@ -8,6 +8,9 @@ handlers:
 - url: /api/.*
   script: gae.main.APPLICATION
 
+- url: /agent/.*
+  script: gae.agent.APPLICATION
+
 - url: /task/.*
   script: gae.task.APPLICATION
   login: admin
@@ -19,14 +22,17 @@ handlers:
   static_files: app/index.html
   upload: app/
 
+# - url: /_ah/channel/.*
+#   script: main
+
 # Must be last
 - url: /
   static_dir: app
 
 
 # https://developers.google.com/appengine/docs/python/config/appconfig#Inbound_Services
-inbound_services:
-- channel_presence
+# inbound_services:
+# - channel_presence
 
 
 # See https://developers.google.com/appengine/docs/python/config/appconfig#Python_app_yaml_Skipping_files

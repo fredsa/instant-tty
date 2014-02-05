@@ -2,6 +2,7 @@ import httplib
 import shared
 import webapp2
 
+from . import agent
 from . import compute
 from . import model
 from . import settings
@@ -10,9 +11,10 @@ class InstanceHandler(webapp2.RequestHandler):
 
   def post(self):
     user_id = self.request.get('user_id')
+    assert user_id
     instance_name = self.request.get('instance_name')
-    plaintext_secret = self.request.get('plaintext_secret')
     assert instance_name
+    plaintext_secret = self.request.get('plaintext_secret')
     assert plaintext_secret
     # TODO: Make sure we don't re-use an undeleted disk
     disk_name = compute.GetOrCreateDisk(user_id, instance_name)
@@ -20,6 +22,8 @@ class InstanceHandler(webapp2.RequestHandler):
       self.error(httplib.REQUEST_TIMEOUT)
       return
     metadata = {
+      'agent_base_url': agent.GetAgentBaseUrl(),
+      'user_id': user_id,
       'plaintext_secret': plaintext_secret,
     }
     instance = compute.GetOrCreateInstance(user_id, instance_name, metadata)

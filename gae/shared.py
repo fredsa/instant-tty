@@ -5,6 +5,7 @@ import logging
 import os
 
 from error import Abort
+from . import jsonutil
 from . import settings
 
 from google.appengine.api import app_identity
@@ -80,3 +81,32 @@ def IsHttpReadMethod(environ):
 def AssertIsAdmin():
   if not users.is_current_user_admin():
     Abort(403, 'Admin only function')
+
+
+class AccessCheckHandler(jsonutil.JsonHandler):
+  """Convenience request handler for handler JSON requests and responses."""
+
+  def PerformAccessCheck(self):
+    """Perform authorization checks.
+
+    Subclasses must provide a suitable implementation.
+
+    Raises:
+      error.AppError if autorization check fails
+    """
+    raise NotImplementedError()
+
+  def dispatch(self):
+    """WSGI request dispatch with automatic JSON handling and access checks."""
+    try:
+      self.PerformAccessCheck()
+    except error.AppError, e:
+      # Manually dispatch to handle_exception
+      self.handle_exception(e, self.app.debug)
+      return
+
+    content_type = self.request.headers.get('Content-Type')
+    if content_type and content_type.split(';')[0] == settings.JSON_MIME_TYPE:
+      self.request.data = jsonutil.fromjson(self.request.body)
+    # Exceptions in super.dispatch are automatically routed to handle_exception
+    super(AccessCheckHandler, self).dispatch()

@@ -156,11 +156,8 @@ class Session(object):
     return self.app(environ, custom_start_response)
 
 
-class AccessKeyCookieFilter(object):
-  """WSGI middleware which manages and trackes access_key cookies.
-
-  If a set cookie query parameter is found or an existing cookie the access_key
-  is stored in environ['mimic.access_key'].
+class PlaintextSecretExtractor(object):
+  """WSGI middleware which extracts plaintext secrets.
   """
 
   def __init__(self, app):
@@ -168,44 +165,9 @@ class AccessKeyCookieFilter(object):
 
   def __call__(self, environ, start_response):
     request = webapp2.Request(environ, app=self.app)
-    access_key = (request.get(settings.ACCESS_KEY_SET_COOKIE_PARAM_NAME) or
-                  request.cookies.get(settings.ACCESS_KEY_COOKIE_NAME))
-    if access_key:
-      environ['mimic.access_key'] = access_key
-
-    # pylint:disable-msg=invalid-name
-    def custom_start_response(status, headers, exc_info=None):
-      """Custom WSGI start_response which adds cookie header."""
-      if access_key:
-        # keep session cookies private
-        headers.extend([
-            MakeCookieHeader(settings.ACCESS_KEY_COOKIE_NAME, access_key,
-                             settings.ACCESS_KEY_COOKIE_ARGS),
-            # Note App Engine automatically sets a 'Date' header for us. See
-            # https://developers.google.com/appengine/docs/python/runtime#Responses
-            ('Expires', settings.LONG_AGO),
-            ('Cache-Control', 'private, max-age=0'),
-        ])
-      return start_response(status, headers, exc_info)
-
-    return self.app(environ, custom_start_response)
-
-
-class AccessKeyHttpHeaderFilter(object):
-  """WSGI middleware which detects access_key HTTP header.
-
-  If the header is detected, the access_key is stored in
-  environ['mimic.access_key'].
-  """
-
-  def __init__(self, app):
-    self.app = app
-
-  def __call__(self, environ, start_response):
-    request = webapp2.Request(environ, app=self.app)
-    access_key = request.headers.get(settings.ACCESS_KEY_HTTP_HEADER)
-    if access_key:
-      environ['mimic.access_key'] = access_key
+    plaintext_secret = request.get('plaintext_secret')
+    if plaintext_secret:
+      environ['plaintext_secret'] = 'plaintext_secret'
     return self.app(environ, start_response)
 
 

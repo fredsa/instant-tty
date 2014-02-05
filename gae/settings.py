@@ -28,16 +28,16 @@ LONG_AGO = 'Mon, 01 Jan 1990 00:00:00 GMT'
 
 JSON_MIME_TYPE = 'application/json'
 
-ACCESS_KEY_SET_COOKIE_PARAM_NAME = 'set_access_key_cookie'
+# ACCESS_KEY_SET_COOKIE_PARAM_NAME = 'set_access_key_cookie'
 
-ACCESS_KEY_HTTP_HEADER = 'X-App-Access-Key'
+# ACCESS_KEY_HTTP_HEADER = 'X-App-Access-Key'
 
-ACCESS_KEY_COOKIE_NAME = 'access_key'
+# ACCESS_KEY_COOKIE_NAME = 'access_key'
 
-ACCESS_KEY_COOKIE_ARGS = {
-    'httponly': True,
-    'secure': not DEV_MODE,
-}
+# ACCESS_KEY_COOKIE_ARGS = {
+#     'httponly': True,
+#     'secure': not DEV_MODE,
+# }
 
 # name for the session cookie
 SESSION_COOKIE_NAME = 'session'

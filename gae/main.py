@@ -5,7 +5,6 @@ import webapp2
 from . import channel
 from . import compute
 from . import error
-from . import jsonutil
 from . import middleware
 from . import model
 from . import settings
@@ -27,20 +26,7 @@ else:
   redirect_uri = 'https://{}/'.format(app_identity.get_default_version_hostname())
 
 
-class JsonHandler(webapp2.RequestHandler):
-  """Convenience request handler for handler JSON requests and responses."""
-
-  def dispatch(self):
-    self.request.data = jsonutil.fromjson(self.request.body)
-    r = super(JsonHandler, self).dispatch()
-    if self.response.headers['Content-Type'] != settings.JSON_MIME_TYPE:
-      self.response.headers['Content-Type'] = settings.JSON_MIME_TYPE
-      # JSON Vulnerability Protection, see http://docs.angularjs.org/api/ng.$http
-      self.response.write(")]}',\n")
-      self.response.write(jsonutil.tojson(r))
-
-
-class AppHandler(JsonHandler):
+class AppHandler(shared.AccessCheckHandler):
   """Convenience request handler with app specific functionality."""
 
   @webapp2.cached_property
@@ -83,31 +69,6 @@ class AppHandler(JsonHandler):
             # '&login_hint={}'
             '&include_granted_scopes=false'
             .format(CLIENT_ID, callbackuri, scopes))
-
-  def PerformAccessCheck(self):
-    """Perform authorization checks.
-
-    Subclasses must provide a suitable implementation.
-
-    Raises:
-      error.AppError if autorization check fails
-    """
-    raise NotImplementedError()
-
-  def dispatch(self):
-    """WSGI request dispatch with automatic JSON parsing."""
-    try:
-      self.PerformAccessCheck()
-    except error.AppError, e:
-      # Manually dispatch to handle_exception
-      self.handle_exception(e, self.app.debug)
-      return
-
-    content_type = self.request.headers.get('Content-Type')
-    if content_type and content_type.split(';')[0] == settings.JSON_MIME_TYPE:
-      self.request.data = jsonutil.fromjson(self.request.body)
-    # Exceptions in super.dispatch are automatically routed to handle_exception
-    super(AppHandler, self).dispatch()
 
 
 class ConfigHandler(AppHandler):

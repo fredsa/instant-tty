@@ -85,6 +85,7 @@ def AllocateInstance(user_id):
     for instance_name in instance_names:
       plaintext_secret = secret.GenerateRandomString()
       task = taskqueue.add(url='/task/instance', params={
+        'user_id': user_id,
         'instance_name': instance_name,
         'plaintext_secret': plaintext_secret,
       })
