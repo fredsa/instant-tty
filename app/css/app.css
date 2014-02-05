@@ -26,3 +26,7 @@ BODY {
     .channel-msg-last {
       opacity: 1.0;
     }
+
+.debug {
+  color: #ccc;
+}
