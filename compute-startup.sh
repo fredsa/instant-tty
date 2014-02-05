@@ -2,6 +2,7 @@
 #
 set -eux
 
+
 time (
   # See https://developers.google.com/compute/docs/instances?hl=en#dmi
   if [ "$( sudo dmidecode -s bios-vendor 2>/dev/null | grep Google )" != "Google" ]
@@ -10,8 +11,26 @@ time (
     exit 1
   fi
 
-  projectid="$( curl -s http://metadata/0.1/meta-data/project-id )"
+  METADATA_BASE_URL="http://metadata/0.1/meta-data"
+  projectid="$( curl --fail --silent $METADATA_BASE_URL/project-id )"
+  user_id="$( curl --fail --silent $METADATA_BASE_URL/attributes/user_id || echo '' )"
+  plaintext_secret="$( curl --fail --silent $METADATA_BASE_URL/attributes/plaintext_secret || echo '' )"
+  agent_base_url="$( curl --fail --silent $METADATA_BASE_URL/attributes/agent_base_url || echo '' )"
   gsfile=gs://$projectid/instant-tty.tar.gz
+
+  function send_msg() {
+    msg="$1"
+    json="{\"user_id\": \"$user_id\", \"plaintext_secret\": \"$(plaintext_secret)\", \"msg\": \"$(date)\"}"
+    curl \
+      --fail \
+      --silent \
+      --header "Content-Type: application/json" \
+      --data "$json" \
+      $agent_base_url/status \
+    || echo "Failed to send msg '$msg'"
+  }
+
+  send_msg 'Running Compute Engine startup script'
 
   if [ $(which node >/dev/null; echo $?) != 0 ]
   then
