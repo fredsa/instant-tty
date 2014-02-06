@@ -20,7 +20,7 @@ time (
 
   function send_msg() {
     msg="$1"
-    json="{\"user_id\": \"$user_id\", \"plaintext_secret\": \"$plaintext_secret\", \"msg\": \"$(date)\"}"
+    json="{\"user_id\": \"$user_id\", \"plaintext_secret\": \"$plaintext_secret\", \"msg\": \"$msg\"}"
     curl \
       --fail \
       --silent \
@@ -30,12 +30,13 @@ time (
     || echo "Failed to send msg '$msg'"
   }
 
-  send_msg 'Running Compute Engine startup script'
+  send_msg "Running Compute Engine startup script"
 
   if [ $(which node >/dev/null; echo $?) != 0 ]
   then
     if [ ! -d node-v0.10.24-linux-x64 ]
     then
+      send_msg "Downloading Node.js"
       curl --silent http://nodejs.org/dist/v0.10.24/node-v0.10.24-linux-x64.tar.gz | tar xz
     fi
 
@@ -46,27 +47,36 @@ time (
   then
     if [ $( gsutil -q stat $gsfile ;echo $? ) == 0 ]
     then
-      echo "Using existing pre-built project archive $gsfile ..."
+      send_msg "Using existing pre-built project archive $gsfile ..."
       gsutil -q cp $gsfile .
       tar xfz instant-tty.tar.gz
     else
-      echo "Building a new project archive, which we will attempt to copy to $gsfile ..."
+      send_msg "Building a new project archive, which we will attempt to copy to $gsfile ..."
+
+      send_msg "Updating package database"
       sudo apt-get update -y
+
+      send_msg "Installing packages"
       sudo apt-get install -y git make g++
+
+      send_msg "Cloning git repo"
       git clone https://github.com/fredsa/instant-tty
       (
+        send_msg "Running 'npm install'"
         cd instant-tty/term
         npm install
       )
+      send_msg "Creating and uploading new archive $gsfile"
       tar cfz instant-tty.tar.gz instant-tty/
       gsutil -q cp instant-tty.tar.gz $gsfile && gsutil -q ls -la $gsfile || echo "WARNING: Unable to write to $gsfile"
     fi
   fi
 
 
-  echo "Launching server..."
+  send_msg "Launching tty server..."
   (
     cd instant-tty
     ./term.sh --port 80 -d
+    send_msg "SERVER_READY"
   )
 )
