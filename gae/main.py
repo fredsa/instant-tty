@@ -14,6 +14,7 @@ from . import wsgi_config
 from error import Abort
 
 from google.appengine.api import app_identity
+from google.appengine.api import urlfetch
 
 
 # From https://cloud.google.com/console/project/apps~little-black-box/apiui/credential
@@ -117,6 +118,17 @@ class InstanceHandler(AppHandler):
     channel.send_message(self.user_id, 'Instance {} created with IP address {}'
                                        .format(instance.instance_name,
                                                instance.external_ip_addr))
+    try:
+      response = urlfetch.fetch(url='http://{}'.format(instance.external_ip_addr),
+                                follow_redirects=False)
+      if response.status_code != httplib.OK:
+        Abort(httplib.REQUEST_TIMEOUT,
+              'Waiting for instance startup script to complete: {}'
+              .format(response.status_code))
+    except urlfetch.DownloadError, e:
+      Abort(httplib.REQUEST_TIMEOUT,
+            'Waiting for instance startup script to complete: {}'
+            .format(e))
     return {
       'instance_name': instance.instance_name,
       'external_ip_addr': instance.external_ip_addr,

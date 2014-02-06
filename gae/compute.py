@@ -65,7 +65,7 @@ def _Fetch(user_id, reason, url, method='GET', payload=None):
                             })
   shared.i('COMPUTE: {} -> {}'.format(reason, httplib.responses[response.status_code]))
 
-  if response.status_code != 200:
+  if response.status_code != httplib.OK:
     Abort(response.status_code, 'UrlFetch() {} {}\nWith Payload: {}\nResulted in:\n{}'
                                 .format(method, url, payload, response.content))
   return json.loads(response.content)
