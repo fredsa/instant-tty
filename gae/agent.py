@@ -1,8 +1,8 @@
 import webapp2
 
 from google.appengine.api import app_identity
-from google.appengine.api import channel
 
+from . import channel
 from . import settings
 from . import shared
 from . import middleware
@@ -24,7 +24,7 @@ class StatusHandler(AgentHandler):
 
   def post(self):
     # TODO: confirm plaintext_secret
-    # plaintext_secret = self.request.data['plaintext_secret']
+    plaintext_secret = self.request.data['plaintext_secret']
     user_id = self.request.data['user_id']
     msg = self.request.data['msg']
     channel.send_message(user_id, msg)
