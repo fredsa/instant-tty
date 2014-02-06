@@ -48,7 +48,6 @@ STARTUP_SCRIPT_URL='https://raw.github.com/fredsa/instant-tty/master/compute-sta
 
 
 def _Fetch(user_id, reason, url, method='GET', payload=None):
-  channel.send_message(user_id, reason)
   if shared.IsDevMode():
     authorization_value = GetDevModeAccessToken()
   else:
@@ -108,6 +107,7 @@ def _MakeDiskUrl(disk_name):
 
 
 def CreateDisk(user_id, disk_name):
+  channel.send_message(user_id, 'Creating Compute Engine disk {}'.format(disk_name))
   imageurl = ListDebianCloudImages(user_id)[0]
   url = '{}?sourceImage={}'.format(COMPUTE_DISKS_URL, imageurl)
   r = _Fetch(user_id,
@@ -135,6 +135,20 @@ def GetOrCreateDisk(user_id, disk_name):
     return None
 
 
+def DeleteDiskIfExists(user_id, disk_name):
+  channel.send_message(user_id, 'Deleting Compute Engine disk {}'.format(disk_name))
+  try:
+    r = _Fetch(user_id,
+               'disks.delete({!r})'.format(disk_name),
+               url=_MakeDiskUrl(disk_name),
+               method='DELETE')
+  except error.AppError, e:
+    if e.status_code == httplib.NOT_FOUND:
+      return
+    raise
+  return r
+
+
 def _MakeInstanceUrl(instance_name):
   return '{}/{}'.format(COMPUTE_INSTANCES_URL, instance_name)
 
@@ -147,6 +161,7 @@ def GetInstance(user_id, instance_name):
 
 
 def _CreateInstance(user_id, instance_name, metadata=None):
+  channel.send_message(user_id, 'Creating Compute Engine instance {}'.format(instance_name))
   metadata = metadata or {}
   metadata['startup-script-url'] = STARTUP_SCRIPT_URL
   metadata_items = [{'key': k, 'value': v} for k,v in metadata.iteritems()]
@@ -198,6 +213,7 @@ def GetOrCreateInstance(user_id, instance_name, metadata):
 
 
 def DeleteInstanceIfExists(user_id, instance_name):
+  channel.send_message(user_id, 'Deleting Compute Engine instance {}'.format(instance_name))
   try:
     r = _Fetch(user_id,
                'instances.delete({!r})'.format(instance_name),
@@ -208,18 +224,3 @@ def DeleteInstanceIfExists(user_id, instance_name):
       return
     raise
   return r
-
-
-def DeleteDiskIfExists(user_id, instance_name):
-  try:
-    r = _Fetch(user_id,
-               'disks.delete({!r})'.format(instance_name),
-               url=_MakeDiskUrl(instance_name),
-               method='DELETE')
-  except error.AppError, e:
-    if e.status_code == httplib.NOT_FOUND:
-      return
-    raise
-  return r
-
-
