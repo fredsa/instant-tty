@@ -5,6 +5,7 @@ set -eux
 plaintext_secret="secret42"
 
 if [ "$#" -ge 2 ]
+  then
   if [ "$1" == "--secret" ]
   then
     shift
