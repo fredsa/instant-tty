@@ -109,15 +109,10 @@ class InstanceHandler(AppHandler):
       channel.send_message(self.user_id, 'Allocating instance ...')
       instance_name = model.AllocateInstance(self.user_id,
                                              settings.COMPUTE_INSTANCE_TTL_MINUTES)
-    channel.send_message(self.user_id, 'Retrieving details for instance {}...'
-                                       .format(instance_name))
     instance = model.GetInstance(instance_name)
     if instance.task_name:
       Abort(httplib.REQUEST_TIMEOUT, 'Waiting on provisioning task {}'
                                      .format(instance.task_name))
-    channel.send_message(self.user_id, 'Instance {} created with IP address {}'
-                                       .format(instance.instance_name,
-                                               instance.external_ip_addr))
     try:
       response = urlfetch.fetch(url='http://{}'.format(instance.external_ip_addr),
                                 follow_redirects=False)
