@@ -13,9 +13,9 @@ time (
 
   METADATA_BASE_URL="http://metadata/0.1/meta-data"
   projectid="$( curl --fail --silent $METADATA_BASE_URL/project-id )"
-  user_id="$( curl --fail --silent $METADATA_BASE_URL/attributes/user_id || echo '' )"
-  plaintext_secret="$( curl --fail --silent $METADATA_BASE_URL/attributes/plaintext_secret || echo '' )"
-  agent_base_url="$( curl --fail --silent $METADATA_BASE_URL/attributes/agent_base_url || echo '' )"
+  user_id="$( curl --fail --silent $METADATA_BASE_URL/attributes/user_id )"
+  plaintext_secret="$( curl --fail --silent $METADATA_BASE_URL/attributes/plaintext_secret )"
+  agent_base_url="$( curl --fail --silent $METADATA_BASE_URL/attributes/agent_base_url )"
   gsfile=gs://$projectid/instant-tty.tar.gz
 
   function send_msg() {
