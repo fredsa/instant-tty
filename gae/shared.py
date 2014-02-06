@@ -104,9 +104,4 @@ class AccessCheckHandler(jsonutil.JsonHandler):
       # Manually dispatch to handle_exception
       self.handle_exception(e, self.app.debug)
       return
-
-    content_type = self.request.headers.get('Content-Type')
-    if content_type and content_type.split(';')[0] == settings.JSON_MIME_TYPE:
-      self.request.data = jsonutil.fromjson(self.request.body)
-    # Exceptions in super.dispatch are automatically routed to handle_exception
     super(AccessCheckHandler, self).dispatch()

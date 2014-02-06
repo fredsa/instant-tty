@@ -50,7 +50,7 @@ def MarkInstanceTaskComplete(instance_name, external_ip_addr):
 
   for instance in instances.instances:
     if instance.instance_name == instance_name:
-      assert instance.task_name == shared.GetCurrentTaskName()
+      assert instance.task_name == shared.GetCurrentTaskName(), 'current task {} unable to access instance {} owned by task {}'.format(shared.GetCurrentTaskName(), instance_name, instance.task_name)
       instance.task_name = None
       instance.external_ip_addr = external_ip_addr
       instances.put()
@@ -67,7 +67,7 @@ def GetInstance(instance_name):
 
 
 @ndb.transactional(xg=True)
-def AllocateInstance(user_id):
+def AllocateInstance(user_id, instance_ttl_minutes):
   # make sure we have a transactionally consistent view
   user, instances = ndb.get_multi([ndb.Key(User, user_id), INSTANCES_KEY])
   if instances is None:
@@ -84,17 +84,26 @@ def AllocateInstance(user_id):
     instance_names = _MakeInstanceNames(needed_instances)
     for instance_name in instance_names:
       plaintext_secret = secret.GenerateRandomString()
-      task = taskqueue.add(url='/task/instance', params={
+      params={
         'user_id': user_id,
         'instance_name': instance_name,
         'plaintext_secret': plaintext_secret,
-      })
+      }
+      create_task = taskqueue.add(url='/task/create_instance',
+                                  queue_name='instances',
+                                  transactional=True,
+                                  params=params)
       instance = Instance(
         instance_name=instance_name,
         plaintext_secret=plaintext_secret,
-        task_name=task.name,
+        task_name=create_task.name,
         user_id=None,
       )
+      delete_task = taskqueue.add(url='/task/delete_instance',
+                                  queue_name='instances',
+                                  transactional=True,
+                                  countdown=instance_ttl_minutes * 60,
+                                  params=params)
       instances.instances.append(instance)
     instances.put()
 
@@ -106,5 +115,23 @@ def AllocateInstance(user_id):
       return instance_name
 
   shared.e('Unexpected')
+
+
+@ndb.transactional(xg=True)
+def DeleteInstance(user_id, instance_name):
+  # make sure we have a transactionally consistent view
+  user, instances = ndb.get_multi([ndb.Key(User, user_id), INSTANCES_KEY])
+
+  assert user.instance_name == instance_name, 'user {} trying to delete instance {} but is assigned instance {}'.format(user_id, instance_name, user.instance_name)
+
+  for instance in instances.instances:
+    if instance.instance_name == instance_name and instance.user_id == user_id:
+      instances.instances.remove(instance)
+      user.instance_name = None
+      ndb.put_multi([user, instances])
+      return
+
+  shared.e('Unable to locate instance {} for user {}'
+           .format(instance_name, user_id))
 
 

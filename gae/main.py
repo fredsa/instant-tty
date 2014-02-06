@@ -106,7 +106,8 @@ class InstanceHandler(AppHandler):
     instance_name = self.user.instance_name
     if not self.user.instance_name:
       channel.send_message(self.user_id, 'Allocating instance ...')
-      instance_name = model.AllocateInstance(self.user_id)
+      instance_name = model.AllocateInstance(self.user_id,
+                                             settings.COMPUTE_INSTANCE_TTL_MINUTES)
     channel.send_message(self.user_id, 'Retrieving details for instance {}...'
                                        .format(instance_name))
     instance = model.GetInstance(instance_name)

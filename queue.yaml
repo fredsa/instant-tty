@@ -1,5 +1,5 @@
 queue:
-- name: default
+- name: instances
   rate: 10/s
   retry_parameters:
     min_backoff_seconds: 5

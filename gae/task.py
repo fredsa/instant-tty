@@ -7,7 +7,8 @@ from . import compute
 from . import model
 from . import settings
 
-class InstanceHandler(webapp2.RequestHandler):
+
+class CreateInstanceHandler(webapp2.RequestHandler):
 
   def post(self):
     user_id = self.request.get('user_id')
@@ -37,6 +38,21 @@ class InstanceHandler(webapp2.RequestHandler):
                                    external_ip_addr=external_ip_addr)
 
 
+class DeleteInstanceHandler(webapp2.RequestHandler):
+
+  def post(self):
+    user_id = self.request.get('user_id')
+    assert user_id
+    instance_name = self.request.get('instance_name')
+    assert instance_name
+    plaintext_secret = self.request.get('plaintext_secret')
+    assert plaintext_secret
+    compute.DeleteInstanceIfExists(user_id, instance_name)
+    compute.DeleteDiskIfExists(user_id, instance_name)
+    model.DeleteInstance(user_id, instance_name)
+
+
 APPLICATION = webapp2.WSGIApplication([
-    ('/task/instance', InstanceHandler),
+    ('/task/create_instance', CreateInstanceHandler),
+    ('/task/delete_instance', DeleteInstanceHandler),
 ], debug=settings.DEBUG)

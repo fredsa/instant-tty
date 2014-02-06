@@ -8,7 +8,9 @@ from google.appengine.api import backends
 
 DEBUG = True
 
-COMPUTE_IDLE_INSTANCES_TARGET = 1
+COMPUTE_IDLE_INSTANCES_TARGET = 0
+
+COMPUTE_INSTANCE_TTL_MINUTES = 10
 
 COMPUTE_PROJECT_ID = app_identity.get_application_id()
 

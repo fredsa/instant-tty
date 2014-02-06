@@ -20,7 +20,7 @@ time (
 
   function send_msg() {
     msg="$1"
-    json="{\"user_id\": \"$user_id\", \"plaintext_secret\": \"$(plaintext_secret)\", \"msg\": \"$(date)\"}"
+    json="{\"user_id\": \"$user_id\", \"plaintext_secret\": \"$plaintext_secret\", \"msg\": \"$(date)\"}"
     curl \
       --fail \
       --silent \

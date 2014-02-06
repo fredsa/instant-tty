@@ -15,6 +15,7 @@ class AppError(Exception):
   def __init__(self, status_code, message):
     super(AppError, self).__init__(message)
     self.status_code = status_code
+    self.message = message
 
   def __repr__(self):
     text = '{}<{} {}>'.format(self.__class__, self.status_code, self.message)

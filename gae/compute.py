@@ -9,6 +9,7 @@ from google.appengine.api import memcache
 from google.appengine.api import urlfetch
 
 from . import channel
+from . import error
 from . import settings
 
 from error import Abort
@@ -102,6 +103,10 @@ def ListDebianCloudImages(user_id):
   return [item['selfLink'] for item in r['items'] if _IsDesiredImage(item)]
 
 
+def _MakeDiskUrl(disk_name):
+  return '{}/{}'.format(COMPUTE_DISKS_URL, disk_name)
+
+
 def CreateDisk(user_id, disk_name):
   imageurl = ListDebianCloudImages(user_id)[0]
   url = '{}?sourceImage={}'.format(COMPUTE_DISKS_URL, imageurl)
@@ -130,9 +135,14 @@ def GetOrCreateDisk(user_id, disk_name):
     return None
 
 
+def _MakeInstanceUrl(instance_name):
+  return '{}/{}'.format(COMPUTE_INSTANCES_URL, instance_name)
+
+
 def GetInstance(user_id, instance_name):
-  url = '{}/{}'.format(COMPUTE_INSTANCES_URL, instance_name)
-  r = _Fetch(user_id, 'instances.get({!r})'.format(instance_name), url=url)
+  r = _Fetch(user_id,
+             'instances.get({!r})'.format(instance_name),
+             url=_MakeInstanceUrl(instance_name))
   return r
 
 
@@ -185,5 +195,31 @@ def GetOrCreateInstance(user_id, instance_name, metadata):
     operation = _CreateInstance(user_id, instance_name, metadata)
     instance = GetInstance(user_id, instance_name)
   return instance
+
+
+def DeleteInstanceIfExists(user_id, instance_name):
+  try:
+    r = _Fetch(user_id,
+               'instances.delete({!r})'.format(instance_name),
+               url=_MakeInstanceUrl(instance_name),
+               method='DELETE')
+  except error.AppError, e:
+    if e.status_code == httplib.NOT_FOUND:
+      return
+    raise
+  return r
+
+
+def DeleteDiskIfExists(user_id, instance_name):
+  try:
+    r = _Fetch(user_id,
+               'disks.delete({!r})'.format(instance_name),
+               url=_MakeDiskUrl(instance_name),
+               method='DELETE')
+  except error.AppError, e:
+    if e.status_code == httplib.NOT_FOUND:
+      return
+    raise
+  return r
 
 
