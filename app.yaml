@@ -7,28 +7,34 @@ threadsafe: true
 handlers:
 - url: /api/.*
   script: gae.main.APPLICATION
+  secure: always
 
 - url: /agent/.*
   script: gae.agent.APPLICATION
+  secure: always
 
 - url: /task/.*
   script: gae.task.APPLICATION
   login: admin
+  secure: always
 
 - url: /bootstrap
   static_dir: bootstrap
+  secure: always
 
 - url: (/|/oauth2callback)
   static_files: app/index.html
   upload: app/
+  secure: always
 
 # - url: /_ah/channel/.*
 #   script: main
+#   secure: always
 
 # Must be last
 - url: /
   static_dir: app
-
+  secure: always
 
 # https://developers.google.com/appengine/docs/python/config/appconfig#Inbound_Services
 # inbound_services:
