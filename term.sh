@@ -12,5 +12,6 @@ if [ "$#" -ge 2 ]
     shift
   fi
 fi
-sed -i -e "s/\(resource.*\)'socket.io'/\1'$plaintext_secret'/" term/node_modules/tty.js/static/tty.js
+sed -i -e "s/\(resource.*\)'socket.io'/\1'$plaintext_secret'/" \
+  term/index.js term/node_modules/tty.js/static/tty.js
 term/index.js $*

@@ -26,7 +26,16 @@
 	  </div>
   </div>
 
-	<script src="secret42/socket.io.js"></script>
+  <script>
+  	var plaintext_secret = window.location.hash ?
+  	  window.location.hash.substring(1) : 'secret42';
+  	var elem = document.createElement("script");
+  	elem.src = plaintext_secret + "/socket.io.js";
+  	elem.type = "text/javascript";
+  	elem.async = true;
+  	console.log('Appending script tag: ' + elem.src);
+  	document.body.appendChild(elem);
+  </script>
 	<script src="term.js"></script>
 	<script src="options.js"></script>
 	<script src="tty.js"></script>
