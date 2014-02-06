@@ -51,20 +51,35 @@
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body ng-cloak>
+  <div class="page">
 
-  <div ng-controller="AlertController">
-    <!-- use ALERT here so CLOSE attribute triggers close widget -->
-    <alert ng-repeat="alert in alerts()" close="closeAlert($index)" class="alert alert-{{alert.type}} alert-pre alert-reduced-margin"><i class="{{alert.icon}}"></i> <span ng-bind-html="alert.htmlMsg"></span>{{alert.msg}}</alert>
-  </div>
+    <div class="main-content">
 
-  <div ng-view></div>
+      <div ng-view></div>
 
-  <div ng-controller="ChannelController" class="channel-container">
-    <div>Most recent status messages:</div>
-    <div class="channel-msg-list">
-      <div ng-repeat="msg in messages | tail:4" class="channel-msg" ng-class="{'channel-msg-last': $last}">{{msg}}</div>
+      <div ng-controller="AlertController">
+        <!-- use ALERT here so CLOSE attribute triggers close widget -->
+        <alert ng-repeat="alert in alerts()" close="closeAlert($index)" class="alert alert-{{alert.type}} alert-pre alert-reduced-margin"><i class="{{alert.icon}}"></i> <span ng-bind-html="alert.htmlMsg"></span>{{alert.msg}}</alert>
+      </div>
+
     </div>
-  </div>
+
+    <div class="footer">
+      <div class="footer-content">
+
+        <div ng-controller="ChannelController" class="channel-container">
+          <div class="debug pull-right">
+            <div>User id: {{config.user_id}}</div>
+          </div>
+
+          <div>Most recent status messages:</div>
+          <div class="channel-msg-list">
+            <div ng-repeat="msg in messages | tail:4" class="channel-msg" ng-class="{'channel-msg-last': $last}">{{msg}}</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
 
 </body>
 </html>

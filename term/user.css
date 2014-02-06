@@ -109,13 +109,13 @@ HTML.maximized {
 .footer {
   /* 9em + 2 * .5em = 10em */
   height: 9em;
-  padding: .5em;
-}
-
-.footer {
+  padding: .5em 0em;
   width: 100%;
   border-top: 1px solid #666;
   color: #666;
   position: absolute;
   bottom: 0px;
 }
+  .footer-content {
+    margin: 0em .5em;
+  }

@@ -29,6 +29,7 @@ angular.module('myApp.controllers', [])
   $scope.messages = [];
 
   appConfig.then(function(config) {
+    $scope.config = config;
     $scope.channel = new goog.appengine.Channel(config.channel_token);
     $scope.socket = $scope.channel.open();
     $scope.socket.onopen = $scope.onopen;
