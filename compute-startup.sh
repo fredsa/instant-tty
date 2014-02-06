@@ -15,10 +15,11 @@ time (
   projectid="$( curl --fail --silent $METADATA_BASE_URL/project-id )"
   user_id="$( curl --fail --silent $METADATA_BASE_URL/attributes/user_id || echo 'nobody' )"
   plaintext_secret="$( curl --fail --silent $METADATA_BASE_URL/attributes/plaintext_secret || echo 'secret42' )"
-  agent_base_url="$( curl --fail --silent $METADATA_BASE_URL/attributes/agent_base_url || echo 'http://localhost ')"
+  agent_base_url="$( curl --fail --silent $METADATA_BASE_URL/attributes/agent_base_url || echo '' )"
   gsfile=gs://$projectid/instant-tty.tar.gz
 
   function send_msg() {
+    [ -z "$agent_base_url" ] && return
     msg="$1"
     json="{\"user_id\": \"$user_id\", \"plaintext_secret\": \"$plaintext_secret\", \"msg\": \"$msg\"}"
     curl \
@@ -76,7 +77,7 @@ time (
   send_msg "Launching tty server..."
   (
     cd instant-tty
-    ./term.sh --port 80 -d
+    ./term.sh --secret "$plaintext_secret" --port 80 -d
     send_msg "SERVER_READY"
   )
 )
