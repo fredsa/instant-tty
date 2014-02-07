@@ -116,7 +116,7 @@ angular.module('myApp.controllers', [])
     .success(function(data, status, headers, config) {
       $scope.status = 'Opening a new window to ' + data.instance_name +
                       ' with IP address ' +  data.external_ip_addr;
-      $window.open('http://' + data.external_ip_addr);
+      $window.open('http://' + data.external_ip_addr + '/#' + data.plaintext_secret);
     })
     .error(function(data, status, headers, config) {
       // TODO: Exponential backoff

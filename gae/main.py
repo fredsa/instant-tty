@@ -127,6 +127,7 @@ class InstanceHandler(AppHandler):
     return {
       'instance_name': instance.instance_name,
       'external_ip_addr': instance.external_ip_addr,
+      'plaintext_secret': instance.plaintext_secret,
     }
 
 
