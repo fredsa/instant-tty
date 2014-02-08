@@ -47,7 +47,7 @@ COMPUTE_AUTHORIZATION_MEMCACHE_KEY = 'COMPUTE_AUTHORIZATION_MEMCACHE_KEY'
 STARTUP_SCRIPT_URL='https://raw.github.com/fredsa/instant-tty/master/scripts/compute-startup.sh'
 
 
-def _Fetch(user_id, reason, url, method='GET', payload=None):
+def _Fetch(reason, url, method='GET', payload=None):
   if shared.IsDevMode():
     authorization_value = GetDevModeAccessToken()
   else:
@@ -82,7 +82,7 @@ def SetDevModeAccessToken(access_token, token_type, expires_in):
 
 
 def ListInstances():
-  r = _Fetch(user_id, 'LIST INSTANCES',url=COMPUTE_INSTANCES_URL)
+  r = _Fetch('LIST INSTANCES',url=COMPUTE_INSTANCES_URL)
   return [item['name'] for item in r['items']]
 
 
@@ -95,9 +95,8 @@ def _IsDesiredImage(image):
   return True
 
 
-def ListDebianCloudImages(user_id):
-  r = _Fetch(user_id,
-             'images.list(debian && !deprecated)',
+def ListDebianCloudImages():
+  r = _Fetch('images.list(debian && !deprecated)',
              url=DEBIAN_CLOUD_IMAGES_URL)
   return [item['selfLink'] for item in r['items'] if _IsDesiredImage(item)]
 
@@ -106,12 +105,11 @@ def _MakeDiskUrl(disk_name):
   return '{}/{}'.format(COMPUTE_DISKS_URL, disk_name)
 
 
-def CreateDisk(user_id, disk_name):
-  channel.send_message(user_id, 'Creating Compute Engine disk {}'.format(disk_name))
-  imageurl = ListDebianCloudImages(user_id)[0]
+def CreateDisk(disk_name):
+  channel.send_message(disk_name, 'Creating Compute Engine disk {}'.format(disk_name))
+  imageurl = ListDebianCloudImages()[0]
   url = '{}?sourceImage={}'.format(COMPUTE_DISKS_URL, imageurl)
-  r = _Fetch(user_id,
-             'disks.create({!r})'.format(disk_name),
+  r = _Fetch('disks.create({!r})'.format(disk_name),
              url=url,
              method='POST',
              payload=json.dumps({
@@ -120,26 +118,25 @@ def CreateDisk(user_id, disk_name):
   return r
 
 
-def _GetDisk(user_id, disk_name):
+def _GetDisk(disk_name):
   url = '{}/{}'.format(COMPUTE_DISKS_URL, disk_name)
-  r = _Fetch(user_id, 'disks.get({!r})'.format(disk_name), url=url)
+  r = _Fetch('disks.get({!r})'.format(disk_name), url=url)
   return r
 
 
-def GetOrCreateDisk(user_id, disk_name):
+def GetOrCreateDisk(disk_name):
   try:
-    disk = _GetDisk(user_id, disk_name)
+    disk = _GetDisk(disk_name)
     return disk
   except:
-    disk = CreateDisk(user_id, disk_name)
+    disk = CreateDisk(disk_name)
     return None
 
 
-def DeleteDiskIfExists(user_id, disk_name):
-  channel.send_message(user_id, 'Deleting Compute Engine disk {}'.format(disk_name))
+def DeleteDiskIfExists(disk_name):
+  channel.send_message(disk_name, 'Deleting Compute Engine disk {}'.format(disk_name))
   try:
-    r = _Fetch(user_id,
-               'disks.delete({!r})'.format(disk_name),
+    r = _Fetch('disks.delete({!r})'.format(disk_name),
                url=_MakeDiskUrl(disk_name),
                method='DELETE')
   except error.AppError, e:
@@ -153,19 +150,18 @@ def _MakeInstanceUrl(instance_name):
   return '{}/{}'.format(COMPUTE_INSTANCES_URL, instance_name)
 
 
-def GetInstance(user_id, instance_name):
-  r = _Fetch(user_id,
-             'instances.get({!r})'.format(instance_name),
+def GetInstance(instance_name):
+  r = _Fetch('instances.get({!r})'.format(instance_name),
              url=_MakeInstanceUrl(instance_name))
   return r
 
 
-def _CreateInstance(user_id, instance_name, metadata=None):
-  channel.send_message(user_id, 'Creating Compute Engine instance {}'.format(instance_name))
+def _CreateInstance(instance_name, metadata=None):
+  channel.send_message(instance_name, 'Creating Compute Engine instance {}'.format(instance_name))
   metadata = metadata or {}
   metadata['startup-script-url'] = STARTUP_SCRIPT_URL
   metadata_items = [{'key': k, 'value': v} for k,v in metadata.iteritems()]
-  disk = GetOrCreateDisk(user_id, instance_name)
+  disk = GetOrCreateDisk(instance_name)
   diskurl = disk['selfLink']
   payload = json.dumps({
    'machineType': COMPUTE_MACHINE_TYPE_URL,
@@ -196,27 +192,25 @@ def _CreateInstance(user_id, instance_name, metadata=None):
      }
    ],
   })
-  r = _Fetch(user_id,
-             'instances.insert({!r})'.format(instance_name),
+  r = _Fetch('instances.insert({!r})'.format(instance_name),
              url=COMPUTE_INSTANCES_URL,
              method='POST',
              payload=payload)
   return r
 
-def GetOrCreateInstance(user_id, instance_name, metadata):
+def GetOrCreateInstance(instance_name, metadata):
   try:
-    instance = GetInstance(user_id, instance_name)
+    instance = GetInstance(instance_name)
   except:
-    operation = _CreateInstance(user_id, instance_name, metadata)
-    instance = GetInstance(user_id, instance_name)
+    operation = _CreateInstance(instance_name, metadata)
+    instance = GetInstance(instance_name)
   return instance
 
 
-def DeleteInstanceIfExists(user_id, instance_name):
-  channel.send_message(user_id, 'Deleting Compute Engine instance {}'.format(instance_name))
+def DeleteInstanceIfExists(instance_name):
+  channel.send_message(instance_name, 'Deleting Compute Engine instance {}'.format(instance_name))
   try:
-    r = _Fetch(user_id,
-               'instances.delete({!r})'.format(instance_name),
+    r = _Fetch('instances.delete({!r})'.format(instance_name),
                url=_MakeInstanceUrl(instance_name),
                method='DELETE')
   except error.AppError, e:

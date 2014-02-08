@@ -11,17 +11,17 @@ time (
     exit 1
   fi
 
+  hostname="$( hostname )"
   METADATA_BASE_URL="http://metadata/0.1/meta-data"
   projectid="$( curl --fail --silent $METADATA_BASE_URL/project-id )"
-  user_id="$( curl --fail --silent $METADATA_BASE_URL/attributes/user_id || echo 'nobody' )"
   plaintext_secret="$( curl --fail --silent $METADATA_BASE_URL/attributes/plaintext_secret || echo 'secret42' )"
   agent_base_url="$( curl --fail --silent $METADATA_BASE_URL/attributes/agent_base_url || echo '' )"
-  gsfile=gs://$projectid/instant-tty.tar.gz
+  bucket=gs://$projectid
 
   function send_msg() {
     [ -z "$agent_base_url" ] && return
     msg="$1"
-    json="{\"user_id\": \"$user_id\", \"plaintext_secret\": \"$plaintext_secret\", \"msg\": \"$msg\"}"
+    json="{\"hostname\": \"$hostname\", \"plaintext_secret\": \"$plaintext_secret\", \"msg\": \"$msg\"}"
     curl \
       --fail \
       --silent \
@@ -46,33 +46,49 @@ time (
 
   if [ ! -d instant-tty ]
   then
-    if [ $( gsutil -q stat $gsfile ;echo $? ) == 0 ]
+    if [ $( gsutil -q stat $bucket/instant-tty.tar.gz ;echo $? ) == 0 ]
     then
-      send_msg "Using existing pre-built project archive $gsfile ..."
-      gsutil -q cp $gsfile .
+      send_msg "Using existing pre-built project archive $bucket/instant-tty.tar.gz ..."
+      gsutil -q cp $bucket/instant-tty.tar.gz .
       tar xfz instant-tty.tar.gz
     else
-      send_msg "Building a new project archive, which we will attempt to copy to $gsfile ..."
-
       send_msg "Updating package database"
       sudo apt-get update -y
 
-      send_msg "Installing packages"
-      sudo apt-get install -y git make g++
+      send_msg "Installing git"
+      sudo apt-get install -y git
 
       send_msg "Cloning git repo"
       git clone https://github.com/fredsa/instant-tty
+
+      send_msg "Creating and uploading new archive $bucket/instant-tty.tar.gz"
+      tar cfz instant-tty.tar.gz instant-tty/
+      gsutil -q cp instant-tty.tar.gz $bucket/instant-tty.tar.gz \
+        && gsutil -q ls -la $bucket/instant-tty.tar.gz \
+        || echo "WARNING: Unable to write to $bucket/instant-tty.tar.gz"
+    fi
+
+    if [ $( gsutil -q stat $bucket/node_modules.tar.gz ;echo $? ) == 0 ]
+    then
+      send_msg "Using existing pre-built node_modules archive $bucket/node_modules.tar.gz ..."
+      gsutil -q cp $bucket/node_modules.tar.gz .
+      tar xfz node_modules.tar.gz
+    else
+      send_msg "Installing make / g++"
+      sudo apt-get install -y make g++
+
+      send_msg "Building a new node_modules archive ..."
       (
         send_msg "Running 'npm install'"
         cd instant-tty/term
         npm install
       )
-      send_msg "Creating and uploading new archive $gsfile"
-      tar cfz instant-tty.tar.gz instant-tty/
-      gsutil -q cp instant-tty.tar.gz $gsfile && gsutil -q ls -la $gsfile || echo "WARNING: Unable to write to $gsfile"
+      tar cfz node_modules.tar.gz instant-tty/term/node_modules/
+      gsutil -q cp node_modules.tar.gz $bucket/node_modules.tar.gz \
+        && gsutil -q ls -la $bucket/node_modules.tar.gz \
+        || echo "WARNING: Unable to write to $bucket/node_modules.tar.gz"
     fi
   fi
-
 
   send_msg "Launching tty server..."
   (

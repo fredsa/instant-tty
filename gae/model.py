@@ -85,7 +85,6 @@ def AllocateInstance(user_id, instance_ttl_minutes):
     for instance_name in instance_names:
       plaintext_secret = secret.GenerateRandomString()
       params={
-        'user_id': user_id,
         'instance_name': instance_name,
         'plaintext_secret': plaintext_secret,
       }
@@ -135,3 +134,11 @@ def DeleteInstance(user_id, instance_name):
            .format(instance_name, user_id))
 
 
+def LookupUser(instance_name, plaintext_secret):
+  instances = INSTANCES_KEY.get()
+  for instance in instances.Instances:
+    if instance.instance_name == instance_name:
+      if instance.plaintext_secret != plaintext_secret:
+        return None
+      return instance.user_id
+  return None

@@ -24,9 +24,17 @@ class StatusHandler(AgentHandler):
 
   def post(self):
     # TODO: confirm plaintext_secret
+    instance_name = self.request.data['hostname']
+    assert instance_name
     plaintext_secret = self.request.data['plaintext_secret']
-    user_id = self.request.data['user_id']
+    assert plaintext_secret
     msg = self.request.data['msg']
+    assert msg
+    user_id = model.LookupUser(instance_name, plaintext_secret)
+    if user_id is None:
+      Abort(httplib.NOT_FOUND,
+            'Failed to lookup user_id from instance {} with plaintext secret {}'
+            .format(instance_name, plaintext_secret))
     channel.send_message(user_id, msg)
 
 
