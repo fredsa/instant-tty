@@ -121,7 +121,7 @@ angular.module('myApp.controllers', [])
     $scope.status = 'Creating a scratch Compute Engine VM...';
     $http.post('/api/instance')
     .success(function(data, status, headers, config) {
-      $scope.$emit('channel_token', data.instance_name);
+      $scope.$emit('channel_token', data.channel_token);
       $scope.status = 'Instance ' + data.instance_name +
                       ' with IP address ' + data.external_ip_addr +
                       ' is ready.'
