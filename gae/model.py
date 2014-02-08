@@ -136,7 +136,7 @@ def DeleteInstance(instance_name):
 
 def LookupUser(instance_name, plaintext_secret):
   instances = INSTANCES_KEY.get()
-  for instance in instances.Instances:
+  for instance in instances.instances:
     if instance.instance_name == instance_name:
       if instance.plaintext_secret != plaintext_secret:
         return None
