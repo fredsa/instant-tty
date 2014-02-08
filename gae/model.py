@@ -117,17 +117,17 @@ def AllocateInstance(user_id, instance_ttl_minutes):
 
 
 @ndb.transactional(xg=True)
-def DeleteInstance(user_id, instance_name):
-  # make sure we have a transactionally consistent view
-  user, instances = ndb.get_multi([ndb.Key(User, user_id), INSTANCES_KEY])
-
-  assert user.instance_name == instance_name, 'user {} trying to delete instance {} but is assigned instance {}'.format(user_id, instance_name, user.instance_name)
+def DeleteInstance(instance_name):
+  instances = INSTANCES_KEY.get()
 
   for instance in instances.instances:
-    if instance.instance_name == instance_name and instance.user_id == user_id:
+    if instance.instance_name == instance_name:
       instances.instances.remove(instance)
-      user.instance_name = None
-      ndb.put_multi([user, instances])
+      instances.put()
+      user = ndb.Key(User, instance.user_id).get()
+      if user:
+        user.instance_name = None
+        user.put()
       return
 
   shared.e('Unable to locate instance {} for user {}'
