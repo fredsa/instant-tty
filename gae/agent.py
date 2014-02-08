@@ -6,6 +6,7 @@ from . import channel
 from . import settings
 from . import shared
 from . import middleware
+from . import model
 
 
 def GetAgentBaseUrl():

@@ -126,7 +126,7 @@ class InstanceHandler(AppHandler):
             .format(e))
     return {
       'instance_name': instance.instance_name,
-      'channel_token': channel.create_channel(instance.instance_name)
+      'channel_token': channel.create_channel(instance.instance_name),
       'external_ip_addr': instance.external_ip_addr,
       'plaintext_secret': instance.plaintext_secret,
     }
