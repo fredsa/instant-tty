@@ -30,12 +30,16 @@ angular.module('myApp.controllers', [])
 
   appConfig.then(function(config) {
     $scope.config = config;
-    $scope.channel = new goog.appengine.Channel(config.channel_token);
-    $scope.socket = $scope.channel.open();
-    $scope.socket.onopen = $scope.onopen;
-    $scope.socket.onclose = $scope.onclose;
-    $scope.socket.onerror = $scope.onerror;
-    $scope.socket.onmessage = $scope.onmessage;
+    $scope.$emit('channel_token', config.channel_token);
+  });
+
+  $scope.$on('channel_token', function(evt, channel_token) {
+    var channel = new goog.appengine.Channel(channel_token);
+    var socket = channel.open();
+    socket.onopen = $scope.onopen;
+    socket.onclose = $scope.onclose;
+    socket.onerror = $scope.onerror;
+    socket.onmessage = $scope.onmessage;
   });
 
   $scope.onopen = function() {
@@ -46,7 +50,6 @@ angular.module('myApp.controllers', [])
 
   $scope.onclose = function() {
     // $log.debug('socket.onclose()');
-    $scope.socket = undefined;
     maybe_open_socket_with_backoff();
     $scope.$apply();
   };
@@ -118,8 +121,9 @@ angular.module('myApp.controllers', [])
     $scope.status = 'Creating a scratch Compute Engine VM...';
     $http.post('/api/instance')
     .success(function(data, status, headers, config) {
+      $scope.$emit('channel_token', data.instance_name);
       $scope.status = 'Instance ' + data.instance_name +
-                      ' with IP address ' +  data.external_ip_addr +
+                      ' with IP address ' + data.external_ip_addr +
                       ' is ready.'
       $scope.term_url = 'http://' + data.external_ip_addr +
                         '/#' + data.plaintext_secret;
