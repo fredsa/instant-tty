@@ -110,13 +110,19 @@ angular.module('myApp.controllers', [])
     }
   });
 
+  $scope.openwindow = function() {
+    $window.open($scope.term_url);
+  }
+
   $scope.newinstance = function() {
-    $scope.status = 'Requesting instance...';
+    $scope.status = 'Creating a scratch Compute Engine VM...';
     $http.post('/api/instance')
     .success(function(data, status, headers, config) {
-      $scope.status = 'Opening a new window to ' + data.instance_name +
-                      ' with IP address ' +  data.external_ip_addr;
-      $window.open('http://' + data.external_ip_addr + '/#' + data.plaintext_secret);
+      $scope.status = 'Instance ' + data.instance_name +
+                      ' with IP address ' +  data.external_ip_addr +
+                      ' is ready.'
+      $scope.term_url = 'http://' + data.external_ip_addr +
+                        '/#' + data.plaintext_secret;
     })
     .error(function(data, status, headers, config) {
       // TODO: Exponential backoff
