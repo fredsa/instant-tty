@@ -77,7 +77,7 @@ time (
   send_msg "Launching tty server..."
   (
     cd instant-tty
-    ./term.sh --secret "$plaintext_secret" --port 80 -d
+    scripts/term.sh --secret "$plaintext_secret" --port 80 -d
     send_msg "SERVER_READY"
   )
 )

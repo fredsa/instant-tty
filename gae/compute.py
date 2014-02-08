@@ -44,7 +44,7 @@ DEFAULT_NETWORK_URL = '{}/networks/default'.format(COMPUTE_PROJECT_GLOBAL_URL)
 
 COMPUTE_AUTHORIZATION_MEMCACHE_KEY = 'COMPUTE_AUTHORIZATION_MEMCACHE_KEY'
 
-STARTUP_SCRIPT_URL='https://raw.github.com/fredsa/instant-tty/master/compute-startup.sh'
+STARTUP_SCRIPT_URL='https://raw.github.com/fredsa/instant-tty/master/scripts/compute-startup.sh'
 
 
 def _Fetch(user_id, reason, url, method='GET', payload=None):

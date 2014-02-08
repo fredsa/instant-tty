@@ -47,7 +47,7 @@ IMAGE=$(
     --format=names \
   | sort -n \
   | tail -1)
-STARTUP_SCRIPT_URL=https://raw.github.com/fredsa/instant-tty/master/compute-startup.sh
+STARTUP_SCRIPT_URL=https://raw.github.com/fredsa/instant-tty/master/scripts/compute-startup.sh
 
 echo "EXISTING INSTANCES: "
 gcutil listinstances \
@@ -101,7 +101,7 @@ externalip="$(
     | sed -e 's/ //g' \
     | cut -d'|' -f3
 )"
-url="http://$externalip/"
+url="http://$externalip/#$PLAINTEXT_SECRET"
 echo ""
 echo "TO CONNECT TO THE INSTANCE ONCE IT'S RUNNING:"
 echo ""
